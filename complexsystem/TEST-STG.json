@@ -1,0 +1,312 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "",
+  "Parameters" : {
+    "PRDSGAlbaigWebSG" : {
+     "Description" : "Get the InstanceSecurityGroup from created SG stack ",
+      "Type" : "String",
+      "Default" : "PRD-SG-AlbaigWebSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "PRDSGEc2Web07SG" : {
+     "Description" : "Get the InstanceSecurityGroup from created SG stack ",
+      "Type" : "String",
+      "Default" : "PRD-SG-Ec2Web07SG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "	PRDSGAlbCorpWebSG" : {
+     "Description" : "Get the InstanceSecurityGroup from created SG stack ",
+      "Type" : "String",
+      "Default" : "	PRD-SG-AlbCorpWebSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "PRDSGAclHttpSG" : {
+      "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "	PRD-SG-AclHttpSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "PRDSGPrdDefElbSG" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "PRD-SG-PrdDefElbSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "PRDSGAclHttpsSG" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "PRD-SG-AclHttpsSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "PRDSGDefAlb" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "PRD-SG-DefAlb",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "PRDSGEc2Web08SG" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "PRD-SG-Ec2Web08SG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "PRDSGprdcorpRdsSG" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "PRD-SGprd-corp-RdsSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "PRDSGprodDefLinuxSG2" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "PRD-SG-prod-DefLinuxSG2",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "VPCprodprdprdSubnet3PubA" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPCprodprdprdSubnet3PubA",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "VPCprodprdVPC" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPCprodprdVPC",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "VPCprodprdprdSubnet3PubA" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPCprodprdprdSubnet3PubA",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "VPCprodprdprdSubnet1PubA" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPCprod-prd-prdSubnet1PubA",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "VPCprodprdprdSubnet2PubC" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPCprod-prd-prdSubnet2PubC",
+      "ConstraintDescription" : "First character is stack name"
+    }
+
+  },
+  "Resources" : {
+  	 "aigBastion" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "aig-admin",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : { "Ref" : "Subnet1" } },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.small",
+        "IamInstanceProfile" : {"Ref" : "aigBastionRoleProfile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : { "Ref" : "STGaigSGaigDefLinuxSG" } },{ "Fn::ImportValue" : { "Ref" : "STGaigSGaigBastionSG" } }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Name", "Value" : "aig-bastion" },
+          {"Key" : "Backup-Generation-aig", "Value" : "1900/1/4  0:00:00" },
+          {"Key" : "Category", "Value" : "Mainte" },
+          {"Key" : "BillingType", "Value" : "Mainte" },
+          {"Key" : "Inspector", "Value" : "Mainte" }
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressrdKajiWebA" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "aigBastion" }
+      }
+    },
+
+    "aigZabbix" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "aig-admin",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : { "Ref" : "Subnet2" } },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.large",
+        "IamInstanceProfile" : {"Ref" : "aigZabbixRoleProfile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : { "Ref" : "STGaigSGaigDefLinuxSG" } },{ "Fn::ImportValue" : { "Ref" : "STGaigSGaigZabbixSG" } }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "100","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Name", "Value" : "aig-zabbix" },
+          {"Key" : "Backup-Generation-aig", "Value" : "1900/1/4  0:00:00" },
+          {"Key" : "Category", "Value" : "Mainte" },
+          {"Key" : "BillingType", "Value" : "Mainte" },
+          {"Key" : "Inspector", "Value" : "Mainte" }
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressrdKajiWebB" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "aigZabbix" }
+      }
+    },
+    "S3LogJpaiggroup": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "log.jp.aiggroup",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3LogJpaiggroupPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3LogJpaiggroup"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpaiggroup" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+
+
+	"aigBastionRole" : {
+	    "Type"  : "AWS::IAM::Role",
+	    "Properties" : {
+	    	"RoleName": "aig-bastion@ec2",
+	        "AssumeRolePolicyDocument" : {
+	            "Statement" : [ {
+	                "Effect" : "Allow",
+	                "Principal" : {
+	                    "Service" : [ "ec2.amazonaws.com"]
+	                },
+	                "Action" : [ "sts:AssumeRole" ]
+	            } ]
+	        }
+	    }
+	},
+
+	"aigBastionRolePolicies" : {
+	    "Type" : "AWS::IAM::Policy",
+	    "Properties" : {
+	        "PolicyName" : "S3CodecommitAccess",
+	        "PolicyDocument" : {
+	            "Statement" : [ {
+	                "Effect" : "Allow",
+	                "Action" : ["s3:*","codecommit:*"],
+	                "Resource" : "*"
+	            }]
+	        },
+	        "Roles" : [ { "Ref" : "aigBastionRole" } ]
+	    }
+	},
+
+	"aigBastionRoleProfile" : {
+	    "Type" : "AWS::IAM::InstanceProfile",
+	    "Properties" : {
+	        "Path" : "/",
+	        "Roles" : [ { "Ref" : "aigBastionRole" } ]
+	    }
+	},
+    "aigZabbixRole" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "aig-zabbix@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : [ "ec2.amazonaws.com"]
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+  },
+
+  "aigZabbixRolePolicies" : {
+      "Type" : "AWS::IAM::Policy",
+      "Properties" : {
+          "PolicyName" : "S3CodecommitAccess",
+          "PolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Action" : ["s3:*","codecommit:*"],
+                  "Resource" : "*"
+              }]
+          },
+          "Roles" : [ { "Ref" : "aigZabbixRole" } ]
+      }
+  },
+
+  "aigZabbixRoleProfile" : {
+      "Type" : "AWS::IAM::InstanceProfile",
+      "Properties" : {
+          "Path" : "/",
+          "Roles" : [ { "Ref" : "aigZabbixRole" } ]
+      }
+     }
+  },
+  "Outputs" : {
+    "aigBastion" : {
+      "Description" : "EC2Id of the newly created aigBastion",
+      "Value" :  { "Ref" : "aigBastion" }
+    },
+    "aigZabbix" : {
+      "Description": "EC2Id of the newly created aigZabbix",
+      "Value" : { "Ref" : "aigZabbix" }
+    },
+    "S3LogJpaiggroup" : {
+      "Description": "The Instance ID B",
+      "Value" : { "Ref" : "S3LogJpaiggroup" }
+    }
+  }
+}

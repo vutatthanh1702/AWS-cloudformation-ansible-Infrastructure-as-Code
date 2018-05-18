@@ -1,0 +1,897 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "TEST",
+  "Parameters" : {
+
+    
+    "MyVPCID" : {
+      "Description" : "Get the VPC name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPC-VPC",
+      "ConstraintDescription" : "First character is stack name"
+    }
+
+  },
+  "Resources" : {
+     "TstEc2Web101A" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPC-TstSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.medium",
+        "IamInstanceProfile" : {"Ref" : "TstWeb101Ec2Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "TEST-SG-TstDefLinuxSG2" },{ "Fn::ImportValue" : "TEST-SG-TstEc2Web101SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation-tst", "Value" : "7" },
+          {"Key" : "Name", "Value" : "tst-ec2-web101-a" },
+          {"Key" : "DeployTraget", "Value" : "tst-web101" },
+          {"Key" : "Category", "Value" : "TEST" },
+          {"Key" : "BillingType", "Value" : "web101" },
+          {"Key" : "Inspector", "Value" : "TEST"},
+          {"Key" : "ELB", "Value" : "tst-alb-aig-web" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressTstEc2Web101A" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "TstEc2Web101A" }
+      }
+    },
+
+    "TstEc2Web101C" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPC-TstSubnet2PubC" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.medium",
+        "IamInstanceProfile" : {"Ref" : "TstWeb101Ec2Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "TEST-SG-TstDefLinuxSG2" },{ "Fn::ImportValue" : "TEST-SG-TstEc2Web101SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation-tst", "Value" : "7" },
+          {"Key" : "Name", "Value" : "tst-ec2-web101-c" },
+          {"Key" : "DeployTraget", "Value" : "tst-web101" },
+          {"Key" : "Category", "Value" : "TEST" },
+          {"Key" : "BillingType", "Value" : "web101" },
+          {"Key" : "Inspector", "Value" : "TEST"},
+          {"Key" : "ELB", "Value" : "tst-alb-aig-web" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressTstEc2Web101C" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "TstEc2Web101C" }
+      }
+    },
+
+
+    "TstEc2Web102" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPC-TstSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.medium",
+        "IamInstanceProfile" : {"Ref" : "TstWeb102Ec2Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "TEST-SG-TstDefLinuxSG2" },{ "Fn::ImportValue" : "TEST-SG-TstEc2Web102SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation-tst", "Value" : "7" },
+          {"Key" : "Name", "Value" : "tst-ec2-web102" },
+          {"Key" : "DeployTraget", "Value" : "tst-web102" },
+          {"Key" : "Category", "Value" : "TEST" },
+          {"Key" : "BillingType", "Value" : "web102" },
+          {"Key" : "Inspector", "Value" : "TEST"},
+          {"Key" : "ELB", "Value" : "tst-alb-aig-web" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressTstEc2Web102" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "TstEc2Web102" }
+      }
+    },
+
+    "TstEc2Web103" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPC-TstSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.small",
+        "IamInstanceProfile" : {"Ref" : "TstWeb103Ec2Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "TEST-SG-TstDefLinuxSG2" },{ "Fn::ImportValue" : "TEST-SG-TstEc2Web103SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation-tst", "Value" : "7" },
+          {"Key" : "Name", "Value" : "tst-ec2-web103" },
+          {"Key" : "DeployTraget", "Value" : "tst-web103" },
+          {"Key" : "Category", "Value" : "TEST" },
+          {"Key" : "BillingType", "Value" : "web103" },
+          {"Key" : "Inspector", "Value" : "TEST"},
+          {"Key" : "ELB", "Value" : "tst-alb-aig-web" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressTstEc2Web103" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "TstEc2Web103" }
+      }
+    },
+
+    "TstEc2Web105" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPC-TstSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.small",
+        "IamInstanceProfile" : {"Ref" : "TstWeb105Ec2Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "TEST-SG-TstDefLinuxSG2" },{ "Fn::ImportValue" : "TEST-SG-TstEc2Web105SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation-tst", "Value" : "7" },
+          {"Key" : "Name", "Value" : "tst-ec2-web105" },
+          {"Key" : "DeployTraget", "Value" : "tst-web105" },
+          {"Key" : "Category", "Value" : "TEST" },
+          {"Key" : "BillingType", "Value" : "web105" },
+          {"Key" : "Inspector", "Value" : "TEST"},
+          {"Key" : "ELB", "Value" : "tst-alb-aig-admin" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressTstEc2Web105" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "TstEc2Web105" }
+      }
+    },
+
+    "TstEc2Web106" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPC-TstSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.small",
+        "IamInstanceProfile" : {"Ref" : "TstWeb106Ec2Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "TEST-SG-TstDefLinuxSG2" },{ "Fn::ImportValue" : "TEST-SG-TstEc2Web106SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation-tst", "Value" : "7" },
+          {"Key" : "Name", "Value" : "tst-ec2-web106" },
+          {"Key" : "DeployTraget", "Value" : "tst-web106" },
+          {"Key" : "Category", "Value" : "TEST" },
+          {"Key" : "BillingType", "Value" : "web106" },
+          {"Key" : "Inspector", "Value" : "TEST"},
+          {"Key" : "ELB", "Value" : "tst-alb-aig-admin" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressTstEc2Web106" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "TstEc2Web106" }
+      }
+    },
+
+    "S3LogJpCloudtrail": {
+      "Type": "AWS::S3::Bucket",
+      "DependsOn" : "S3LogJpConfig",
+       "Properties" : {
+          "BucketName" : "log.jp.cloudtrail",
+          "LifecycleConfiguration": {
+                    "Rules": [
+                        {
+                            "Id": "GlacierRule",
+                            "Prefix": "glacier",
+                            "Status": "Enabled",
+                            "ExpirationInDays": "365",
+                            "Transition": {
+                                "TransitionInDays": "1",
+                                "StorageClass": "Glacier"
+                            }
+                        }
+                    ]
+           }
+        }
+    },
+    "S3LogJpCloudtrailPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3LogJpCloudtrail"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpCloudtrail" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+
+
+    "S3LogJpConfig": {
+      "Type": "AWS::S3::Bucket",
+      "DependsOn" : "S3LogJpaiggroup",
+       "Properties" : {
+          "BucketName" : "log.jp.config",
+          "LifecycleConfiguration": {
+                    "Rules": [
+                        {
+                            "Id": "GlacierRule",
+                            "Prefix": "glacier",
+                            "Status": "Enabled",
+                            "ExpirationInDays": "365",
+                            "Transition": {
+                                "TransitionInDays": "1",
+                                "StorageClass": "Glacier"
+                            }
+                        }
+                    ]
+           }
+        }
+    },
+    "S3LogJpConfigPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3LogJpConfig"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpConfig" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+
+
+
+
+
+
+    "S3LogJpaiggroup": {
+      "Type": "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : "alblog.jp.aiggroup"
+      }
+    },
+    "S3LogJpaiggroupBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3LogJpaiggroup"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpaiggroup" },
+                  "/",
+                  "web",
+                  "/AWSLogs/",
+                  { "Ref": "AWS::AccountId" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:PutObject"
+            ]
+
+          },
+          {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpaiggroup" },
+                  "/",
+                  "admin",
+                  "/AWSLogs/",
+                  { "Ref": "AWS::AccountId" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:PutObject"
+            ]
+
+          } ]
+        }
+      }
+    },
+
+
+
+
+    "ALBListenerTstWeb101" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties" : {
+        "DefaultActions" : [{
+          "TargetGroupArn" : { "Ref" : "ALBTargetGroupTstWeb101" },
+          "Type" : "forward"
+        }],
+        "LoadBalancerArn" : { "Ref" : "ApplicationLoadBalancerTstWeb101" },
+        "Port" : "80",
+        "Protocol" : "HTTP"
+      }
+    },
+    "ApplicationLoadBalancerTstWeb101" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "DependsOn" : "ALBTargetGroupTstWeb101",
+      "Properties" : {
+        "Scheme" : "internet-facing",
+        "LoadBalancerAttributes" : [
+          { "Key" : "access_logs.s3.enabled", "Value" : "true" },
+          { "Key" : "access_logs.s3.bucket", 
+            "Value" : 
+            {
+              "Ref": "S3LogJpaiggroup"}
+            },
+          { "Key" : "access_logs.s3.prefix", "Value" : "web" },
+          { "Key" : "idle_timeout.timeout_seconds", "Value" : "60" },
+          { "Key": "deletion_protection.enabled", "Value": "false"}
+        ],
+        "Subnets" : [{ "Fn::ImportValue" : "VPC-TstSubnet1PubA" }, { "Fn::ImportValue" : "VPC-TstSubnet2PubC"  }],
+        "Name": "tst-alb-aig-web",
+        "Tags" : [
+          {"Key": "Name", "Value": "tst-alb-aig-web"}
+        ],
+        "SecurityGroups" : [{ "Fn::ImportValue" : "TEST-SG-TstDefAlbSG2" }, { "Fn::ImportValue" : "TEST-SG-TstAclHttpsSG"  }, { "Fn::ImportValue" : "TEST-SG-TstAclHttpSG"  }]
+      }
+    },
+    "ALBTargetGroupTstWeb101" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "tst-web101",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "tst-web101"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "TstEc2Web101A" }, "Port" : "80" },
+          { "Id" : { "Ref" : "TstEc2Web101C" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+    "ALBTargetGroupTstWeb102" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "tst-web102",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "tst-web102"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "TstEc2Web102" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+    "ALBTargetGroupTstWeb103" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "tst-web103",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "tst-web103"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "TstEc2Web103" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+
+
+    "ALBListenerTstAlbaigAdmin" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties" : {
+        "DefaultActions" : [{
+          "TargetGroupArn" : { "Ref" : "TstWeb105" },
+          "Type" : "forward"
+        }],
+        "LoadBalancerArn" : { "Ref" : "TstAlbaigAdmin" },
+        "Port" : "80",
+        "Protocol" : "HTTP"
+      }
+    },
+    "TstAlbaigAdmin" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "DependsOn" : "TstWeb105",
+      "Properties" : {
+        "Scheme" : "internet-facing",
+        "LoadBalancerAttributes" : [
+          { "Key" : "access_logs.s3.enabled", "Value" : "true" },
+          { "Key" : "access_logs.s3.bucket", 
+            "Value" : 
+            {
+              "Ref": "S3LogJpaiggroup"}
+            },
+          { "Key" : "access_logs.s3.prefix", "Value" : "admin" },
+          { "Key" : "idle_timeout.timeout_seconds", "Value" : "60" },
+          { "Key": "deletion_protection.enabled", "Value": "false"}
+        ],
+        "Name": "tst-alb-aig-admin",
+        "Tags" : [
+          {"Key": "Name", "Value": "tst-alb-aig-admin"}
+        ],
+        "Subnets" : [{ "Fn::ImportValue" : "VPC-TstSubnet1PubA" }, { "Fn::ImportValue" : "VPC-TstSubnet2PubC"  }],
+        "SecurityGroups" : [{ "Fn::ImportValue" : "TEST-SG-TstDefAlbSG2" }, { "Fn::ImportValue" : "TEST-SG-TstAclHttpsSG"  }, { "Fn::ImportValue" : "TEST-SG-TstAclHttpSG"  }]
+      }
+    },
+    "TstWeb105" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "tst-web105",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "tst-web105"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "TstEc2Web105" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+    "TstWeb106" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "tst-web106",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "tst-web106"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "TstEc2Web106" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+
+
+
+
+
+
+
+
+    "TstWeb101Ec2" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"],
+        "RoleName": "tst-web101@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : [ "ec2.amazonaws.com","rds.amazonaws.com","monitoring.rds.amazonaws.com" ]
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "TstWeb101Ec2Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "S3CodecommitAccess",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : "*"
+                }]
+            },
+            "Roles" : [ { "Ref" : "TstWeb101Ec2" } ]
+        }
+    },
+
+    "TstWeb101Ec2Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "TstWeb101Ec2" } ]
+        }
+     },
+
+
+
+   "TstWeb102Ec2" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"],
+        "RoleName": "tst-web102@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : [ "ec2.amazonaws.com","rds.amazonaws.com","monitoring.rds.amazonaws.com" ]
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "TstWeb102Ec2Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "S3CodecommitAccess",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : "*"
+                }]
+            },
+            "Roles" : [ { "Ref" : "TstWeb102Ec2" } ]
+        }
+    },
+
+    "TstWeb102Ec2Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "TstWeb102Ec2" } ]
+        }
+     }
+
+     ,
+    "TstWeb103Ec2" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"],
+        "RoleName": "tst-web103@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : [ "ec2.amazonaws.com","rds.amazonaws.com","monitoring.rds.amazonaws.com" ]
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "TstWeb103Ec2Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "S3CodecommitAccess",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : "*"
+                }]
+            },
+            "Roles" : [ { "Ref" : "TstWeb103Ec2" } ]
+        }
+    },
+
+    "TstWeb103Ec2Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "TstWeb103Ec2" } ]
+        }
+     },
+
+
+    "TstWeb105Ec2" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"],
+        "RoleName": "tst-web105@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : [ "ec2.amazonaws.com","rds.amazonaws.com","monitoring.rds.amazonaws.com" ]
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "TstWeb105Ec2Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "S3CodecommitAccess",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : "*"
+                }]
+            },
+            "Roles" : [ { "Ref" : "TstWeb105Ec2" } ]
+        }
+    },
+
+    "TstWeb105Ec2Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "TstWeb105Ec2" } ]
+        }
+     },
+
+    "TstWeb106Ec2" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"],
+        "RoleName": "tst-web106@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : [ "ec2.amazonaws.com","rds.amazonaws.com","monitoring.rds.amazonaws.com" ]
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "TstWeb106Ec2Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "S3CodecommitAccess",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : "*"
+                }]
+            },
+            "Roles" : [ { "Ref" : "TstWeb106Ec2" } ]
+        }
+    },
+
+    "TstWeb106Ec2Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "TstWeb106Ec2" } ]
+        }
+     }
+
+
+
+  }
+}

@@ -1,0 +1,252 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "STG-AIG",
+  "Parameters" : {
+    "STGAIGSGAIGDefLinuxSG" : {
+     "Description" : "Get the InstanceSecurityGroup from created SG stack ",
+      "Type" : "String",
+      "Default" : "STG-AIG-SG-AIGDefLinuxSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "STGAIGSGAIGBastionSG" : {
+     "Description" : "Get the InstanceSecurityGroup from created SG stack ",
+      "Type" : "String",
+      "Default" : "STG-AIG-SG-AIGBastionSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "STGAIGSGAIGZabbixSG" : {
+     "Description" : "Get the InstanceSecurityGroup from created SG stack ",
+      "Type" : "String",
+      "Default" : "STG-AIG-SG-AIGZabbixSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "Subnet1" : {
+      "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPC-AIGSubnetPubA",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "Subnet2" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPC-AIGSubnetPubC",
+      "ConstraintDescription" : "First character is stack name"
+    }
+
+  },
+  "Resources" : {
+  	 "AIGBastion" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "AIG-admin",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : { "Ref" : "Subnet1" } },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.small",
+        "IamInstanceProfile" : {"Ref" : "AIGBastionRoleProfile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : { "Ref" : "STGAIGSGAIGDefLinuxSG" } },{ "Fn::ImportValue" : { "Ref" : "STGAIGSGAIGBastionSG" } }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Name", "Value" : "AIG-bastion" },
+          {"Key" : "Backup-Generation-AIG", "Value" : "1900/1/4  0:00:00" },
+          {"Key" : "Category", "Value" : "Mainte" },
+          {"Key" : "BillingType", "Value" : "Mainte" },
+          {"Key" : "Inspector", "Value" : "Mainte" }
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressrdAIGWebA" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "AIGBastion" }
+      }
+    },
+
+    "AIGZabbix" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "AIG-admin",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : { "Ref" : "Subnet2" } },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.large",
+        "IamInstanceProfile" : {"Ref" : "AIGZabbixRoleProfile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : { "Ref" : "STGAIGSGAIGDefLinuxSG" } },{ "Fn::ImportValue" : { "Ref" : "STGAIGSGAIGZabbixSG" } }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "100","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Name", "Value" : "AIG-zabbix" },
+          {"Key" : "Backup-Generation-AIG", "Value" : "1900/1/4  0:00:00" },
+          {"Key" : "Category", "Value" : "Mainte" },
+          {"Key" : "BillingType", "Value" : "Mainte" },
+          {"Key" : "Inspector", "Value" : "Mainte" }
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressrdAIGWebB" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "AIGZabbix" }
+      }
+    },
+    "S3LogJpAIGgroup": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "log.jp.AIGgroup",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3LogJpAIGgroupPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3LogJpAIGgroup"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpAIGgroup" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+    
+
+	"AIGBastionRole" : {
+	    "Type"  : "AWS::IAM::Role",
+	    "Properties" : {
+	    	"RoleName": "AIG-bastion@ec2",
+	        "AssumeRolePolicyDocument" : {
+	            "Statement" : [ {
+	                "Effect" : "Allow",
+	                "Principal" : {
+	                    "Service" : [ "ec2.amazonaws.com"]
+	                },
+	                "Action" : [ "sts:AssumeRole" ]
+	            } ]
+	        }
+	    }
+	},
+
+	"AIGBastionRolePolicies" : {
+	    "Type" : "AWS::IAM::Policy",
+	    "Properties" : {
+	        "PolicyName" : "S3CodecommitAccess",
+	        "PolicyDocument" : {
+	            "Statement" : [ {
+	                "Effect" : "Allow",
+	                "Action" : ["s3:*","codecommit:*"],
+	                "Resource" : "*"
+	            }]
+	        },
+	        "Roles" : [ { "Ref" : "AIGBastionRole" } ]
+	    }
+	},
+
+	"AIGBastionRoleProfile" : {
+	    "Type" : "AWS::IAM::InstanceProfile",
+	    "Properties" : {
+	        "Path" : "/",
+	        "Roles" : [ { "Ref" : "AIGBastionRole" } ]
+	    }
+	},
+    "AIGZabbixRole" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "AIG-zabbix@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : [ "ec2.amazonaws.com"]
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+  },
+
+  "AIGZabbixRolePolicies" : {
+      "Type" : "AWS::IAM::Policy",
+      "Properties" : {
+          "PolicyName" : "S3CodecommitAccess",
+          "PolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Action" : ["s3:*","codecommit:*"],
+                  "Resource" : "*"
+              }]
+          },
+          "Roles" : [ { "Ref" : "AIGZabbixRole" } ]
+      }
+  },
+
+  "AIGZabbixRoleProfile" : {
+      "Type" : "AWS::IAM::InstanceProfile",
+      "Properties" : {
+          "Path" : "/",
+          "Roles" : [ { "Ref" : "AIGZabbixRole" } ]
+      }
+     }
+  },
+  "Outputs" : {
+    "AIGBastion" : {
+      "Description" : "EC2Id of the newly created AIGBastion",
+      "Value" :  { "Ref" : "AIGBastion" }
+    },
+    "AIGZabbix" : {
+      "Description": "EC2Id of the newly created AIGZabbix",  
+      "Value" : { "Ref" : "AIGZabbix" }
+    },
+    "S3LogJpAIGgroup" : {
+      "Description": "The Instance ID B",  
+      "Value" : { "Ref" : "S3LogJpAIGgroup" }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+    - name: install default package
+      yum: name={{ item }} state=installed
+      with_items:
+        - nss-pam-ldapd
+        - openldap-clients
+        - openssh-ldap
+        - jwhois
+        - tcpdump
+        - telnet
+        - net-snmp
+        - gcc
+        - logwatch
+        - vsftpd
+        - mysql56

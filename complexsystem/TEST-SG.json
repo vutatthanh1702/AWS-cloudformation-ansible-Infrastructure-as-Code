@@ -1,0 +1,507 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "TEST-SG",
+
+"Parameters" : {
+
+"MyVPCID" : {
+  "Description" : "Get the VPC name from created VPC stack ",
+  "Type" : "String",
+  "Default" : "VPC-VPC",
+  "ConstraintDescription" : "First character is stack name"
+}
+},
+
+  "Resources" : {
+
+        "TstAlbaigAdmin" : {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "GroupDescription" : "tst-alb-aig-admin",
+            "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                    "GroupDescription" : "tst-alb-aig-admin",
+            "SecurityGroupIngress" : [ 
+              {
+             "IpProtocol" : "icmp",
+             "FromPort" : "-1",
+             "ToPort" : "-1",
+             "CidrIp" : "0.0.0.0/0"
+              },
+              {
+             "IpProtocol" : "tcp",
+             "FromPort" : "80",
+             "ToPort" : "80",
+             "CidrIp" : "xxx.2xxx.xxx.210/32"
+              } ],
+            "Tags" : [
+              {"Key" : "Name", "Value" : "tst-alb-aig-admin" }
+            ]
+
+          }
+        },
+
+          "TstRds" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-rds",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-rds" }
+                ],
+                "SecurityGroupIngress" : [ {
+                  "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstEc2Web101", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstEc2Web102", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstEc2Web103", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstEc2Web104", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstEc2Web105", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstEc2Web106", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+
+        "TstAlbaigWeb" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "TstAlbaigWeb",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-alb-aig-web" }
+                ],
+                "SecurityGroupIngress" : [ 
+              {
+                "IpProtocol" : "icmp",
+                 "FromPort" : "-1",
+                 "ToPort" : "-1",
+                 "CidrIp" : "0.0.0.0/0"
+              }
+            ]
+
+          }
+        },
+        "TstAclHttps" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-acl-https",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-acl-https" }
+                ],
+                "SecurityGroupIngress" : [ 
+              {
+             "IpProtocol" : "tcp",
+             "FromPort" : "443",
+             "ToPort" : "443",
+             "CidrIp" : "122.216.8.210/32"
+              },
+              {
+             "IpProtocol" : "tcp",
+             "FromPort" : "443",
+             "ToPort" : "443",
+             "CidrIp" : "124.32.248.2/32"
+              }
+            ]
+
+          }
+        },
+        "TstAclHttp" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-acl-http",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-acl-http" }
+                ],
+                "SecurityGroupIngress" : [ 
+              {
+             "IpProtocol" : "tcp",
+             "FromPort" : "80",
+             "ToPort" : "80",
+             "CidrIp" : "122.216.8.210/32"
+              },
+              {
+             "IpProtocol" : "tcp",
+             "FromPort" : "80",
+             "ToPort" : "80",
+             "CidrIp" : "124.32.248.2/32"
+              }
+            ]
+
+          }
+        },
+        "TstEc2Web101" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-ec2-web101",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-ec2-web101" }
+                ],
+                "SecurityGroupIngress" : [ 
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "81",
+                  "ToPort": "81",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "TstEc2Web102" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-ec2-web102",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-ec2-web102" }
+                ],
+                "SecurityGroupIngress" : [ 
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "81",
+                  "ToPort": "81",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "TstEc2Web103" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-ec2-web103",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-ec2-web103" }
+                ],
+                "SecurityGroupIngress" : [ 
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "81",
+                  "ToPort": "81",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "TstEc2Web104" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-ec2-web104",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-ec2-web104" }
+                ],
+                "SecurityGroupIngress" : [ 
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "81",
+                  "ToPort": "81",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "TstEc2Web105" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-ec2-web105",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-ec2-web105" }
+                ],
+                "SecurityGroupIngress" : [ 
+                 {
+                "IpProtocol" : "tcp",
+                "FromPort" : "22",
+                "ToPort" : "22",
+                "CidrIp" : "122.216.8.210/32"
+              },
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "81",
+                  "ToPort": "81",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "TstEc2Web106" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "tst-ec2-web106",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "tst-ec2-web106" }
+                ],
+                "SecurityGroupIngress" : [ 
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "81",
+                  "ToPort": "81",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["TstAlbaigWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "TstDefLinux" : {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "GroupDescription" : "tst-def-linux",
+            "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+            "GroupDescription" : "tst-def-linux",
+            "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                "FromPort" : "22",
+                "ToPort" : "22",
+                "CidrIp" : "210.245.52.167/32"
+              } ],
+            "Tags" : [
+              {"Key" : "Name", "Value" : "tst-def-linux" }
+            ]
+
+          }
+        },
+        "TstDefAlb" : {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "GroupDescription" : "tst-def-alb",
+            "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+            "GroupDescription" : "tst-def-alb",
+            "SecurityGroupIngress" : [ 
+              {
+             "IpProtocol" : "icmp",
+             "FromPort" : "-1",
+             "ToPort" : "-1",
+             "CidrIp" : "0.0.0.0/0"
+              } ],
+            "Tags" : [
+              {"Key" : "Name", "Value" : "tst-def-alb" }
+            ]
+
+          }
+        }
+
+
+},
+  "Outputs" : {
+    "TstDefLinuxID2" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstDefLinux" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstDefLinuxSG2" }}
+    },
+    "TstDefAlbID2" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstDefAlb" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstDefAlbSG2" }}
+    },
+    "TstDefLinuxID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstAlbaigAdmin" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstDefLinuxSG" }}
+    },
+    "TstDefAlbID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstAlbaigAdmin" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstDefAlbSG" }}
+    },
+    "TstAlbaigAdminID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstAlbaigAdmin" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstAlbaigAdminSG" }}
+    },
+    "TstRdsID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstRds" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstRdsSG" }}
+    },
+    "TstAlbaigWebID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstAlbaigWeb" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstAlbaigWebSG" }}
+    },
+    "TstAclHttpsID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstAclHttps" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstAclHttpsSG" }}
+    },
+    "TstAclHttpID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstAclHttp" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstAclHttpSG" }}
+    },
+    "TstEc2Web101" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstEc2Web101" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstEc2Web101SG" }}
+    },
+    "TstEc2Web102" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstEc2Web102" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstEc2Web102SG" }}
+    },
+    "TstEc2Web103" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstEc2Web103" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstEc2Web103SG" }}
+    },
+    "TstEc2Web104" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstEc2Web104" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstEc2Web104SG" }}
+    },
+    "TstEc2Web105" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstEc2Web105" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstEc2Web105SG" }}
+    },
+    "TstEc2Web106" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "TstEc2Web106" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-TstEc2Web106SG" }}
+    }
+  }
+}

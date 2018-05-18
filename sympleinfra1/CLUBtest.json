@@ -1,0 +1,197 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "japan-AIG",
+
+  "Parameters" : {
+
+    "InstanceType" : {
+      "Description" : "WebServer EC2 instance type",
+      "Type" : "String",
+      "Default" : "t2.small",
+      "AllowedValues" : [ "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "g2.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+   "InstanceSecurityGroup" : {
+     "Description" : "EC2 instance SG",
+     "Type" : "AWS::EC2::SecurityGroup::Id",
+     "ConstraintDescription" : "set default Security Group"
+   },
+
+    "EnvType" : {
+      "Description" : "Environment type.",
+      "Default" : "Prod",
+      "Type" : "String",
+      "AllowedValues" : ["Prod", "Dev"],
+      "ConstraintDescription" : "must specify prod or test."
+    }
+
+  },
+
+  "Resources" : {
+
+    "japanAIG001deva" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "AI-g",
+        "AvailabilityZone" : "ap-southeast-1a" ,
+        "ImageId" : "ami-82b60ae1" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : {"Ref" : "InstanceType"},
+        "SecurityGroupIds" : [{"Ref" : "InstanceSecurityGroup"},{"Fn::GetAtt" : ["japanAIGSG", "GroupId"]}],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "30" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+
+          {"Key" : "Name", "Value" : "japan-AIG-wb001-prd-a" },
+          {"Key" : "Category", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "BillingType", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "Security", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "ELB", "Value" : {"Ref" : "EnvType" } }
+
+        ]
+      }
+    },
+    "japanAIG002devb" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "AI-g",
+        "AvailabilityZone" : "ap-southeast-1b" ,
+        "ImageId" : "ami-1bb00c78" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : {"Ref" : "InstanceType"},
+        "SecurityGroupIds" : [{"Ref" : "InstanceSecurityGroup"},{"Fn::GetAtt" : ["japanAIGSG", "GroupId"]}],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "30" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+
+          {"Key" : "Name", "Value" : "japan-AIG-wb001-prd-b" },
+          {"Key" : "Category", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "BillingType", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "Security", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "ELB", "Value" : {"Ref" : "EnvType" } }
+
+        ]
+      }
+    },
+    "EIPAddressjapanAIG001deva" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "japanAIG001deva" }
+      }
+    },
+
+    "EIPAddressjapanAIG002devb" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "japanAIG002devb" }
+      }
+    },
+    "S3LoggingBucket": {
+      "Type": "AWS::S3::Bucket"
+    },
+    "S3LoggingBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3LoggingBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LoggingBucket" },
+                  "/",
+                  "Logs",
+                  "/AWSLogs/",
+                  { "Ref": "AWS::AccountId" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:PutObject"
+            ]
+          } ]
+        }
+      }
+    },
+    "ElasticLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "AvailabilityZones" : [ "ap-southeast-1a","ap-southeast-1b" ],
+        "CrossZone" : "true",
+        "LBCookieStickinessPolicy" : [{
+          "PolicyName" : "MyLBPolicy",
+          "CookieExpirationPeriod" : "1"
+        } ],
+        "LoadBalancerName" : "lb-sv-japan-AIG",
+        "Instances" : [ { "Ref" : "japanAIG001deva" },{ "Ref" : "japanAIG002devb" } ],
+        "Listeners": [{
+          "LoadBalancerPort": "80",
+          "InstancePort": "80",
+          "Protocol": "HTTP",
+          "PolicyNames" : [ "MyLBPolicy" ]
+        }],
+        "HealthCheck": {
+          "Target": "TCP:80",
+          "HealthyThreshold": "10",
+          "UnhealthyThreshold": "2",
+          "Interval": "30",
+          "Timeout": "5"
+        },
+        "AccessLoggingPolicy": {
+          "S3BucketName": {
+            "Ref": "S3LoggingBucket"
+          },
+          "S3BucketPrefix": "Logs",
+          "Enabled": "true",
+          "EmitInterval" : "60"
+        }
+      },
+      "DependsOn": "S3LoggingBucketPolicy"
+    },
+
+    "japanAIGSG" : {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription" : "japanAIGSG",
+        "Tags" : [
+          {"Key" : "Name", "Value" : "japanAIGSG-ec2" },
+          {"Key" : "Category", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "BillingType", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "Security", "Value" : {"Ref" : "EnvType" } }
+        ],
+        "SecurityGroupIngress" : [ {
+          "IpProtocol" : "tcp",
+          "FromPort" : "80",
+          "ToPort" : "80",
+          "CidrIp" : "xxxx.150.72.56/32"
+        }
+        ]
+      }
+    }
+
+
+
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "default sg for prd env",
+
+"Parameters" : {
+
+"MyVPCID" : {
+  "Description" : "Get the VPC name from created VPC stack ",
+  "Type" : "String",
+  "Default" : "VPC-VPCId",
+  "ConstraintDescription" : "First character is stack name"
+}
+},
+
+  "Resources" : {
+
+    "DefLinux" : {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription" : "prd-def-linux",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "prd-def-linux" },
+          {"Key" : "Category", "Value" : "common"},
+          {"Key" : "BillingType", "Value" : "common" },
+          {"Key" : "Security", "Value" : "common" }
+        ],
+        "SecurityGroupEgress"  : [{
+          "CidrIp" : "0.0.0.0/0",
+          "IpProtocol" : "-1"
+        }
+        ],
+        "SecurityGroupIngress" : [ {
+         "IpProtocol" : "tcp",
+         "FromPort" : "22",
+         "ToPort" : "22",
+         "CidrIp" : "153.150.72.56/32"
+      },
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "22",
+        "ToPort" : "22",
+        "CidrIp" : "113.160.57.22/32"
+      },
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "22",
+        "ToPort" : "22",
+        "CidrIp" : "113.190.248.122/32"
+      },
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "22",
+        "ToPort" : "22",
+        "CidrIp" : "113.190.252.156/32"
+      },
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "22",
+        "ToPort" : "22",
+        "CidrIp" : "210.245.52.167/32"
+      },
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "22",
+        "ToPort" : "22",
+        "CidrIp" : "118.70.128.81/32"
+      },
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "22",
+        "ToPort" : "22",
+        "CidrIp" : "118.69.73.136/32"
+      },
+      {
+        "IpProtocol" : "icmp",
+        "FromPort" : "-1",
+        "ToPort" : "-1",
+        "CidrIp" : "0.0.0.0/0"
+      }
+    ]
+  }
+},
+
+  "DefWindows" : {
+    "Type": "AWS::EC2::SecurityGroup",
+    "Properties": {
+      "GroupDescription" : "def-windows",
+      "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+      "Tags" : [
+        {"Key" : "Name", "Value" : "prd-def-windows" },
+        {"Key" : "Category", "Value" : "common"},
+        {"Key" : "BillingType", "Value" : "common" },
+        {"Key" : "Security", "Value" : "common" }
+      ],
+      "SecurityGroupEgress"  : [{
+        "CidrIp" : "0.0.0.0/0",
+        "IpProtocol" : "-1"
+      }
+      ],
+      "SecurityGroupIngress" : [ {
+       "IpProtocol" : "tcp",
+       "FromPort" : "3389",
+       "ToPort" : "3389",
+       "CidrIp" : "xxx.150.72.56/32"
+    }
+  ]
+  }
+},
+    "prdaclhttp" : {
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn" : "prdaclhttps",
+      "Properties": {
+        "GroupDescription" : "prd-acl-http",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "prd-acl-http" }
+        ],
+        "SecurityGroupIngress" : [ 
+        {
+          "IpProtocol" : "tcp",
+          "FromPort" : "80",
+          "ToPort" : "80",
+          "CidrIp" : "0.0.0.0/0"
+        }]
+        }
+      },
+    "prdaclhttps" : {
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn" : "DefWindows",
+      "Properties": {
+        "GroupDescription" : "prd-acl-https",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "prd-acl-https" }
+        ],
+        "SecurityGroupIngress" : [ 
+        {
+          "IpProtocol" : "tcp",
+          "FromPort" : "443",
+          "ToPort" : "443",
+          "CidrIp" : "0.0.0.0/0"
+        }]
+        }
+      },
+    "ProdSG" :{
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn" : "prdaclhttps",
+      "Properties": {
+        "GroupDescription" : "Prod-SG",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "Prod-SG" }],
+        "SecurityGroupIngress" : [ 
+       {
+          "IpProtocol" : "tcp",
+          "FromPort" : "80",
+          "ToPort" : "80",
+          "CidrIp" : "0.0.0.0/0"
+        },
+        {
+          "IpProtocol" : "tcp",
+          "FromPort" : "443",
+          "ToPort" : "443",
+          "CidrIp" : "0.0.0.0/0"
+        }]
+        }
+
+    },
+
+"PRDMASTERSG" : {
+  "Type": "AWS::EC2::SecurityGroup",
+  "Properties": {
+    "GroupDescription" : "PRDMASTERSG",
+    "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+    "Tags" : [
+      {"Key" : "Name", "Value" : "PRDMASTERSG" },
+      {"Key" : "Category", "Value" : "common"},
+      {"Key" : "BillingType", "Value" : "common" },
+      {"Key" : "Security", "Value" : "common" }
+    ],
+    "SecurityGroupIngress" : [ {
+     "IpProtocol" : "tcp",
+     "FromPort" : "80",
+     "ToPort" : "80",
+     "CidrIp" : "153.150.72.56/32"
+  },
+  {
+    "IpProtocol" : "tcp",
+    "FromPort" : "80",
+    "ToPort" : "80",
+    "CidrIp" : "sss.160.57.22/32"
+  }
+]
+}
+}
+
+},
+  "Outputs" : {
+    "prddeflinuxSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "DefLinux" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-prddeflinuxSG" }}
+    },
+    "prddefwindowsSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "DefWindows" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-prddefwindowsSG" }}
+    },
+    "PRDMASTERSGSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "PRDMASTERSG" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-PRDMASTERSG" }}
+    },
+    "ProdSGSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "ProdSG" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-ProdSG" }}
+    },
+    "prdaclhttpSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "prdaclhttp" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-prdaclhttp" }}
+    },
+    "prdaclhttpsSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "prdaclhttps" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-prdaclhttps" }}
+    }
+  }
+}

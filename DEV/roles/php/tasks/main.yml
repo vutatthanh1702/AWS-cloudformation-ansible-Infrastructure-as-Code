@@ -1,0 +1,43 @@
+---
+#- name: Install PHP Before
+#  yum: name={{item}}
+#  with_items:
+#    - http://ftp-srv2.kddilabs.jp/Linux/distributions/fedora/epel/6/x86_64/epel-release-6-8.noarch.rpm
+#    - http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+#    - http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+
+#- replace: dest=/etc/yum.repos.d/{{item}} regexp="enabled *= *1" replace="enabled=0"
+#  with_items:
+#    - epel.repo
+#    - rpmforge.repo
+#    - remi.repo
+
+#- name: libcrypt
+#  yum: name=libmcrypt enablerepo=epel
+
+#- name: libwebp
+#  yum: name=libwebp enablerepo=epel
+
+#- name: install php5.5
+#  yum: name={{ item }} state=installed
+#  with_items:
+#    - php55
+#    - php55-mysqlnd
+#    - php55-devel
+#    - php55-gd
+#    - php55-mbstring
+#    - php55-mcrypt
+
+- name: install php7.0
+  yum: name={{ item }} state=installed
+  with_items:
+    - php70
+    - php70-mysqlnd
+    - php70-devel
+    - php70-gd
+    - php70-mbstring
+    - php70-mcrypt
+
+- name: SecuritySetting
+  template: src=security.ini  dest=/etc/php.d/security
+  notify: restart httpd

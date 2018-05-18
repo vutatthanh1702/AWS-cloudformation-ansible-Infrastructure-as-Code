@@ -1,0 +1,17 @@
+# 
+- name: TMS dev enviroment
+  hosts: default
+  user: root
+  connection: local
+#  vars_files:
+#  - group_var/all.yml
+#remote_user: root
+sudo: yes
+
+  roles:
+  - common
+#  - ldap
+  - apache
+  - php
+  - mysql
+#  - AfterInstall

@@ -1,0 +1,38 @@
+- name: Configure webserver with proxy
+  hosts: localhost
+  sudo: True
+
+  tasks:
+    - name: install vim-enhanced
+      yum: name=vim-enhanced state=installed
+    - name: install php
+      yum: name={{ item }} state=installed
+      with_items:
+        - vim-enhanced
+        - squid
+    - lineinfile: dest=/etc/squid/squid.conf regexp="^http_access deny all" line=""
+    - lineinfile: dest=/etc/squid/squid.conf regexp="^http_port 3128" line=""
+    - name: add lines to squid.conf
+      blockinfile:
+        dest: /etc/squid/squid.conf
+        content: |
+          # ホストネームは任意のものを。
+          visible_hostname AI-g.jp
+          # ポート8080は一般的すぎるので使いません。
+          http_port 60088
+          # 153.150.72.56はあなたのIPを記述する。
+          # わからなければ
+          # http://www.ugtop.com/spill.shtml
+          # ここの「現在接続している場所（IPv4）」のIPを書きます。
+          acl myacl src 153.150.72.56/255.255.255.255
+          http_access allow myacl
+          http_access deny all
+          # プロキシサーバーを使用している端末のローカルIPアドレスを隠蔽化
+          forwarded_for off
+          # プロキシ経由でアクセスしていることをアクセス先に知られないようにする
+          header_access X-Forwarded-For deny all
+          header_access Via deny all
+          header_access Cache-Control deny all
+    - command: squid -z
+    - name: start squid
+      service: name=squid state=started enabled=yes

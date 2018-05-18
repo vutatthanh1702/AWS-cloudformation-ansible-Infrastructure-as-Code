@@ -1,0 +1,641 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "PRD-SG",
+
+"Parameters" : {
+
+"MyVPCID" : {
+  "Description" : "Get the VPC name from created VPC stack ",
+  "Type" : "String",
+  "Default" : "VPCprod-prd-VPC",
+  "ConstraintDescription" : "First character is stack name"
+}
+},
+
+  "Resources" : {
+
+          "Rds" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-aid-rds",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-aid-rds" }
+                ],
+                "SecurityGroupIngress" : [ {
+                  "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["Ec2Web07", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["Ec2Web08", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["Ec2Web04", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["Ec2Web09", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "ServiceRds" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-service-rds",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-service-rds" }
+                ],
+                "SecurityGroupIngress" : [ {
+                  "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["Ec2Web03", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "3306",
+                  "ToPort": "3306",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["Ec2Web10", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "PrdDefElb" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prddefelb",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-def-elb" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "icmp",
+                 "FromPort" : "-1",
+                 "ToPort" : "-1",
+                 "CidrIp" : "0.0.0.0/0"
+              }
+            ]
+
+          }
+        },
+
+        "AlbAIGWeb" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "AlbAIGWeb",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-alb-AIG-web" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "icmp",
+                 "FromPort" : "-1",
+                 "ToPort" : "-1",
+                 "CidrIp" : "0.0.0.0/0"
+              }
+            ]
+
+          }
+        },
+        "PrdAlbAIGAdmin" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prdalbAIGadmin",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-alb-AIG-admin" }
+                ],
+                "SecurityGroupIngress" : [
+                  {
+                    "IpProtocol" : "tcp",
+                     "FromPort" : "443",
+                     "ToPort" : "443",
+                     "CidrIp" : "xxx.xxx.xxx.xxx/32"
+                  }
+            ]
+
+          }
+        },
+        "AlbAIGWeb04" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "AlbAIGWeb04",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-alb-AIG-web04" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "icmp",
+                 "FromPort" : "-1",
+                 "ToPort" : "-1",
+                 "CidrIp" : "0.0.0.0/0"
+              }
+            ]
+
+          }
+        },
+        "AlbaidWeb" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "AlbaidWeb",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-alb-aid-web" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "icmp",
+                 "FromPort" : "-1",
+                 "ToPort" : "-1",
+                 "CidrIp" : "0.0.0.0/0"
+              }
+            ]
+
+          }
+        },
+        "AclHttps" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-acl-https",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-acl-https" }
+                ],
+                "SecurityGroupIngress" : [
+                  {
+                 "IpProtocol" : "tcp",
+                 "FromPort" : "443",
+                 "ToPort" : "443",
+                 "CidrIp" : "0.0.0.0/0"
+                  }
+            ]
+
+          }
+        },
+        "AclHttp" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-acl-http",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-acl-http" }
+                ],
+                "SecurityGroupIngress" : [
+                  {
+                 "IpProtocol" : "tcp",
+                 "FromPort" : "80",
+                 "ToPort" : "80",
+                 "CidrIp" : "0.0.0.0/0"
+                  }
+            ]
+
+          }
+        },
+        "Ec2Web01" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-ec2-web01",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-ec2-web01" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbaidWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbaidWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "Ec2Web02" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-ec2-web02",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-ec2-web02" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "10050",
+                 "ToPort" : "10050",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntZabbixSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbaidWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbaidWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "Ec2Web03" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-ec2-web03",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-ec2-web03" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "10050",
+                 "ToPort" : "10050",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntZabbixSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbAIGWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbAIGWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "Ec2Web10" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-ec2-web10",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-ec2-web10" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "10050",
+                 "ToPort" : "10050",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntZabbixSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["PrdAlbAIGAdmin", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["PrdAlbAIGAdmin", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "Ec2Web04" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-ec2-web04",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-ec2-web04" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbAIGWeb04", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbAIGWeb04", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "Ec2Web09" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-ec2-web04",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-ec2-web09" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["PrdAlbAIGAdmin", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["PrdAlbAIGAdmin", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "Ec2Web07" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "prd-ec2-web07",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "prd-ec2-web07" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbAIGWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbAIGWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbaidWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbaidWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+        "Ec2Web08" : {
+              "Type": "AWS::EC2::SecurityGroup",
+              "Properties": {
+                "GroupDescription" : "-ec2-web08",
+                "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "Tags" : [
+                  {"Key" : "Name", "Value" : "-ec2-web08" }
+                ],
+                "SecurityGroupIngress" : [
+              {
+                "IpProtocol" : "tcp",
+                 "FromPort" : "22",
+                 "ToPort" : "22",
+                 "SourceSecurityGroupId" :{ "Fn::ImportValue" : "STG-MNT-SG-MntBastionSG" },
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbAIGWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbAIGWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "80",
+                  "ToPort": "80",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbaidWeb", "GroupId"]}
+              },
+              {
+                "IpProtocol": "tcp",
+                  "FromPort": "443",
+                  "ToPort": "443",
+                  "SourceSecurityGroupId" : {"Fn::GetAtt" : ["AlbaidWeb", "GroupId"]}
+              }
+            ]
+
+          }
+        },
+
+        "DefLinux" : {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "GroupDescription" : "prd-def-linux",
+            "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+            "GroupDescription" : "prd-def-linux",
+            "SecurityGroupIngress" : [
+              {
+               "IpProtocol" : "icmp",
+               "FromPort" : "-1",
+               "ToPort" : "-1",
+               "CidrIp" : "0.0.0.0/0"
+              } ],
+            "Tags" : [
+              {"Key" : "Name", "Value" : "prd-def-linux" }
+            ]
+
+          }
+        },
+        "DefAlb" : {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "GroupDescription" : "prd-def-alb",
+            "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+            "GroupDescription" : "prd-def-alb",
+            "SecurityGroupIngress" : [
+              {
+               "IpProtocol" : "icmp",
+               "FromPort" : "-1",
+               "ToPort" : "-1",
+               "CidrIp" : "0.0.0.0/0"
+              } ],
+            "Tags" : [
+              {"Key" : "Name", "Value" : "prd-def-alb" }
+            ]
+
+          }
+        }
+
+
+},
+  "Outputs" : {
+    "DefLinuxID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "DefLinux" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-prod-DefLinuxSG2" }}
+    },
+    "PrdDefElb" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "PrdDefElb" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-PrdDefElbSG" }}
+    },
+
+    "DefAlb" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "DefAlb" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-DefAlb" }}
+    },
+    "RdsID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Rds" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}prd-aid-RdsSG" }}
+    },
+    "ServiceRdsID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "ServiceRds" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}prd-service-ServiceRdsSG" }}
+    },
+    "AlbAIGWebID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "AlbAIGWeb" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-AlbAIGWebSG" }}
+    },
+    "AlbaidWebID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "AlbaidWeb" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-AlbaidWebSG" }}
+    },
+    "AclHttpsID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "AclHttps" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-AclHttpsSG" }}
+    },
+    "AclHttpID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "AclHttp" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-AclHttpSG" }}
+    },
+    "Ec2Web07" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Ec2Web07" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Ec2Web07SG" }}
+    },
+    "Ec2Web08" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Ec2Web08" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Ec2Web08SG" }}
+    },
+    "Ec2Web01" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Ec2Web01" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Ec2Web01SG" }}
+    },
+    "Ec2Web02" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Ec2Web02" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Ec2Web02SG" }}
+    },
+    "Ec2Web03" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Ec2Web03" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Ec2Web03SG" }}
+    },
+    "Ec2Web10" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Ec2Web10" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Ec2Web10SG" }}
+    },
+    "Ec2Web04" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Ec2Web04" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Ec2Web04SG" }}
+    },
+    "AlbAIGWeb04" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "AlbAIGWeb04" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-AlbAIGWeb04SG" }}
+    },
+    "Ec2Web09" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "Ec2Web09" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-Ec2Web09SG" }}
+    },
+    "PrdAlbAIGAdminID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "PrdAlbAIGAdmin" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-PrdAlbAIGAdminSG" }}
+    }
+  }
+}

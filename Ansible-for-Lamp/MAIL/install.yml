@@ -1,0 +1,42 @@
+- name: Configure webserver with proxy
+  hosts: localhost
+  sudo: True
+  vars:
+    password: wdajc97
+  tasks:
+    - name: install postfix
+      yum: name=postfix state=installed
+    - name: download foo.conf
+      get_url:
+       url: http://169.254.169.254/latest/meta-data/public-hostname
+       dest: /home/ec2-user/ansible/dns.txt
+    - name: generate passwod salt for new user
+      shell: "VAR=`command cat dns.txt`"
+    - lineinfile: dest=/etc/postfix/main.cf regexp="^mydestination" line=""
+    - lineinfile: dest=/etc/postfix/main.cf regexp="^inet_interfaces" line="inet_interfaces = all"
+    - name: add lines to squid.conf
+      blockinfile:
+        dest: /etc/postfix/main.cf
+        content: |
+          mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+          smtpd_banner = $myhostname ESMTP unknown
+          smtpd_sasl_auth_enable = yes
+          smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+          smtp_sasl_mechanism_filter = plain
+          smtpd_sasl_local_domain = $myhostname
+          smtpd_recipient_restrictions =
+           permit_mynetworks
+           permit_sasl_authenticated
+           reject_unauth_destination
+    - name: generate dir
+      shell: "mkdir -p /etc/skel/Maildir/{new,cur,tmp}"
+    - name: auth
+      shell: "chmod -R 700 /etc/skel/Maildir/"
+    - name: stop sendmail
+      shell: "/etc/rc.d/init.d/sendmail stop"
+    - name: check sendmail off
+      shell: "chkconfig sendmail off"
+    - name: restart postfix
+      shell: "/etc/rc.d/init.d/postfix restart"
+    - name: add a new user
+      user: name=mailuser password=wdajc97 state=present

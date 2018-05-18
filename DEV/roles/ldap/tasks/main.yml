@@ -1,0 +1,94 @@
+    - name: install nss-pam-ldapd
+      yum: name=nss-pam-ldapd state=installed
+    - lineinfile: dest=/etc/nslcd.conf regexp="^uri ldap" line=""
+    - lineinfile: dest=/etc/nslcd.conf regexp="^base dc" line=""
+    - name: add lines to nslcd
+      blockinfile:
+        dest: /etc/nslcd.conf
+        insertafter: 'auto-migration of settings'
+        content: |
+          uri ldap://xxx.xxx.xxx.xxx/ ldap://xxx.xxx.xxx.xx2
+          base dc=aig-jp,dc=com
+          ssl no
+          tls_cacertdir /etc/openldap/cacerts
+    - lineinfile: dest=/etc/nsswitch.conf regexp="^automount" line=""
+    - lineinfile: dest=/etc/nsswitch.conf regexp="^passwd" line=""
+    - lineinfile: dest=/etc/nsswitch.conf regexp="^shadow" line=""
+    - lineinfile: dest=/etc/nsswitch.conf regexp="^group" line=""
+    - lineinfile: dest=/etc/nsswitch.conf regexp="^netgroup" line=""
+    - name: edit lines of nsswitch
+      blockinfile:
+        dest: /etc/nsswitch.conf
+        insertafter: 'looked up first in the databases'
+        content: |
+          passwd:     files ldap
+          group:      files ldap
+          netgroup:   files ldap
+          automount:  files ldap
+          netgroup:   files ldap
+          sudoers:    files ldap
+    - lineinfile: dest=/etc/pam_ldap.conf regexp="host 127.0.0.1" line=""
+    - lineinfile: dest=/etc/pam_ldap.conf regexp="base dc" line=""
+    - name: add lines to pam_ldap
+      blockinfile:
+        dest: /etc/pam_ldap.conf
+        content: |
+          base dc=aig-jp,dc=com
+          ssl no
+          uri ldap://xxx.xxx.xxx.xxx/ ldap://xxx.xxx.xxx.xx2
+          tls_cacertdir /etc/openldap/cacerts
+          pam_password md5
+    - name: install openssh-ldap
+      yum: name=openssh-ldap state=installed
+    - name: add lines to sshd_config
+      blockinfile:
+        dest: /etc/ssh/sshd_config
+        insertafter: '#AuthorizedKeysCommand none'
+        content: |
+          AuthorizedKeysCommand /usr/libexec/openssh/ssh-ldap-wrapper
+          AuthorizedKeysCommandUser nobody
+    - name: add lines to ldap
+      blockinfile:
+        create: yes
+        dest: /etc/ssh/ldap.conf
+        content: |
+          uri ldap://xxx.xxx.xxx.xxx/ ldap://xxx.xxx.xxx.xx2
+          base dc=aig-jp,dc=com
+          ssl no
+
+    - name: add lines to sshd
+      blockinfile:
+        dest: /etc/pam.d/sshd
+        content: |
+          session     optional    pam_mkhomedir.so skel=/etc/skel umask=0077
+    - replace: dest=/etc/pam.d/system-auth regexp='sha512' replace='md5'
+    - name: add lines to system
+      blockinfile:
+        dest: /etc/pam.d/system-auth
+        marker: "#{mark} ANSIBLE  auth with auth and session with session"
+        insertbefore: BOF
+        content: |
+          auth        sufficient    pam_fprintd.so
+    - lineinfile: dest=/etc/pam.d/system-auth line="session     optional      pam_ldap.so"
+    - replace: dest=/etc/pam.d/password-auth regexp='sha512' replace='md5'
+    - name: add lines to password-auth
+      blockinfile:
+        dest: /etc/pam.d/password-auth
+        content: |
+          session     optional      pam_ldap.so
+    - name: start sshd
+      service: name=sshd state=restarted enabled=yes
+    - name: add lines to sudo-ldap.conf
+      blockinfile:
+        dest: /etc/sudo-ldap.conf
+        content: |
+          uri ldap://xxx.xxx.xxx.xxx/ ldap://xxx.xxx.xxx.xx2
+          sudoers_base ou=Sudoers,dc=aig-jp,dc=com
+    - name: add lines to sudo-ldap.conf
+      blockinfile:
+        dest: /etc/openldap/ldap.conf
+        content: |
+          URI ldap://xxx.xxx.xxx.xxx/ ldap://xxx.xxx.xxx.xx2
+          BASE dc=aig-jp,dc=com
+    - name: start nslcd
+      service: name=nslcd state=started enabled=yes

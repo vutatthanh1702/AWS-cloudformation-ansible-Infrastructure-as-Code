@@ -1,0 +1,465 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "",
+  "Parameters" : {
+
+    "InstanceType" : {
+      "Description" : "WebServer EC2 instance type",
+      "Type" : "String",
+      "Default" : "t2.small",
+      "AllowedValues" : [ "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "g2.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+    "MyVPCID" : {
+      "Description" : "Get the VPC name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPC-VPCId",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "InstanceSecurityGroup" : {
+     "Description" : "Get the InstanceSecurityGroup from created SG stack ",
+      "Type" : "String",
+      "Default" : "PROD-SG-prddeflinuxSG",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "Subnet1" : {
+      "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPC-SubnetID1",
+      "ConstraintDescription" : "First character is stack name"
+    },
+    "Subnet2" : {
+     "Description" : "Get the subnet name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPC-SubnetID2",
+      "ConstraintDescription" : "First character is stack name"
+    }
+
+  },
+  "Resources" : {
+  	 "rdaigWebA" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "key-aws",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : { "Ref" : "Subnet1" } },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : {"Ref" : "InstanceType"},
+        "IamInstanceProfile" : {"Ref" : "S3InstanceProfile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : { "Ref" : "InstanceSecurityGroup" } },{"Fn::GetAtt" : ["prdec2aigweb", "GroupId"]}],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "7" },
+          {"Key" : "Name", "Value" : "prd-aig-web-a" },
+          {"Key" : "Category", "Value" : "Product" },
+          {"Key" : "RunType", "Value" : "Stanby" },
+          {"Key" : "BillingType", "Value" : "aignabi" },
+          {"Key" : "Inspector", "Value" : "aigWEB"},
+          {"Key" : "ELB", "Value" : "prd-elb-aig-web" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressrdaigWebA" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "rdaigWebA" }
+      }
+    },
+
+    "rdaigWebB" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "key-aws",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : { "Ref" : "Subnet2" } },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : {"Ref" : "InstanceType"},
+        "IamInstanceProfile" : {"Ref" : "S3InstanceProfile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : { "Ref" : "InstanceSecurityGroup" } },{"Fn::GetAtt" : ["prdec2aigweb", "GroupId"]}],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "7" },
+          {"Key" : "Name", "Value" : "prd-aig-web-c" },
+          {"Key" : "Category", "Value" : "Product" },
+          {"Key" : "RunType", "Value" : "Stanby" },
+          {"Key" : "BillingType", "Value" : "aignabi" },
+          {"Key" : "Inspector", "Value" : "aigWEB"},
+          {"Key" : "ELB", "Value" : "prd-elb-aig-web" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressrdaigWebB" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "rdaigWebB" }
+      }
+    },
+    "S3prdimgaig": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "prd-img-aig",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3prdimgaigBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3prdimgaig"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3prdimgaig" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+    "TestS3LoggingBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : "log.jp.saintelb"
+      }
+    },
+    "TestS3LoggingBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "TestS3LoggingBucket"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "TestS3LoggingBucket" },
+                  "/",
+                  "Logs",
+                  "/AWSLogs/",
+                  { "Ref": "AWS::AccountId" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:PutObject"
+            ]
+          } ]
+        }
+      }
+    },
+    "ElasticLoadBalancer": {
+      "Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+      "Properties": {
+        "Subnets" : [{ "Fn::ImportValue" : { "Ref" : "Subnet1" } }, { "Fn::ImportValue" : { "Ref" : "Subnet2" } }],
+        "CrossZone" : "true",
+        "SecurityGroups" : [{"Fn::GetAtt" : ["prdelbaigweb", "GroupId"]},{ "Fn::ImportValue" : "PROD-SG-prdaclhttp" },{ "Fn::ImportValue" : "PROD-SG-prdaclhttps" }],
+        "Scheme" : "internet-facing",
+        "LBCookieStickinessPolicy" : [{
+          "PolicyName" : "TestMyLBPolicy",
+          "CookieExpirationPeriod" : "60"
+        } ],
+        "LoadBalancerName" : "prd-elb-aig-web",
+        "Instances" : [ { "Ref" : "rdaigWebA" },{ "Ref" : "rdaigWebB" }],
+        "Listeners": [{
+          "LoadBalancerPort": "80",
+          "InstancePort": "80",
+          "Protocol": "HTTP",
+          "PolicyNames" : [ "TestMyLBPolicy" ]
+        }],
+        "HealthCheck": {
+          "Target": "TCP:80",
+          "HealthyThreshold": "10",
+          "UnhealthyThreshold": "2",
+          "Interval": "30",
+          "Timeout": "5"
+        },
+        "AccessLoggingPolicy": {
+          "S3BucketName": {
+            "Ref": "TestS3LoggingBucket"
+          },
+          "S3BucketPrefix": "Logs",
+          "Enabled": "true",
+          "EmitInterval" : "60"
+        }
+      },
+      "DependsOn": "TestS3LoggingBucketPolicy"
+    },  
+
+
+
+
+    
+      "prddefelb" : {
+        "Type": "AWS::EC2::SecurityGroup",
+        "DependsOn" : "prdec2aigweb",
+        "Properties": {
+          "GroupDescription" : "prd-def-elb",
+          "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+          "Tags" : [
+            {"Key" : "Name", "Value" : "prd-def-elb" }
+          ],
+          "SecurityGroupIngress" : [ 
+          {
+            "IpProtocol" : "icmp",
+           "FromPort" : "-1",
+           "ToPort" : "-1",
+           "CidrIp" : "0.0.0.0/0"
+          }]
+          }
+      },
+      "RDSinstance" : {
+      "Type" : "AWS::RDS::DBInstance",
+      "Properties" : {
+        "MultiAZ": "true",
+        "DBName" : "prdrdsaig",
+        "VPCSecurityGroups" :  [{"Fn::GetAtt" : ["prdrdsaig", "GroupId"]}],
+        "AllocatedStorage" : "20",
+        "DBInstanceClass" : "db.t2.medium",
+        "Engine" : "MySQL",
+        "EngineVersion" : "5.6.27",
+        "PubliclyAccessible" : "false",
+        "StorageEncrypted" : "false",
+        "BackupRetentionPeriod" : "7",
+        "Port" : "3306",
+        "StorageType":"standard",
+        "PreferredMaintenanceWindow" : "",
+        "OptionGroupName" : "default:mysql-5-6",
+        "CopyTagsToSnapshot" : "false",
+        "DBInstanceIdentifier" : "prd-rds-aig",
+        "MonitoringInterval" : "60",
+        "MonitoringRoleArn" : {"Fn::GetAtt" : ["RDSEC2Role", "Arn"] },
+        "LicenseModel" : "general-public-license",
+        "MasterUsername" : "prdrdsaig",
+        "MasterUserPassword" : "xxxxsw4",
+        "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
+        "DBParameterGroupName" : { "Ref" : "ParameterGroup" },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "RDS" }]
+      }
+    },
+    "ParameterGroup" : {
+      "Type": "AWS::RDS::DBParameterGroup",
+      "Properties" : {
+        "Family" : "MySQL5.6",
+        "Description" : "MySQL5.6 Database Parameter Group",
+          "Parameters" : {
+            "autocommit" : "1" ,
+            "character_set_database" :"utf8",
+            "character_set_server" :"utf8"
+        }
+      }
+    },
+    "DBSubnetGroup" : {
+         "Type" : "AWS::RDS::DBSubnetGroup",
+         "Properties" : {
+            "DBSubnetGroupDescription" : "description",
+            "SubnetIds" : [ { "Fn::ImportValue" : { "Ref" : "Subnet1" } }, { "Fn::ImportValue" : { "Ref" : "Subnet2" } } ],
+            "Tags" : [ {"Key" : "Name", "Value" : "Saint"} ]
+         }
+      },
+
+
+
+
+
+    "prdrdsaig" :{
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn" : "prdec2aigweb",
+      "Properties": {
+        "GroupDescription" : "DB SecurityGroup",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "prd-rds-aig" }],
+        "SecurityGroupIngress" : [ {
+         "IpProtocol" : "tcp",
+         "FromPort" : "3306",
+         "ToPort" : "3306",
+         "SourceSecurityGroupId" : {"Fn::GetAtt" : ["prdec2aigweb", "GroupId"]}
+       }]
+      }
+
+    },
+    "prdec2aigweb" :{
+      "Type": "AWS::EC2::SecurityGroup",
+      "DependsOn" : "prdelbaigweb",
+      "Properties": {
+        "GroupDescription" : "prd-ec2-aig-web",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "prd-ec2-aig-web" }],
+        "SecurityGroupIngress" : [ {
+         "IpProtocol" : "tcp",
+         "FromPort" : "80",
+         "ToPort" : "80",
+         "SourceSecurityGroupId" : {"Fn::GetAtt" : ["prdelbaigweb", "GroupId"]}
+       },
+        {
+         "IpProtocol" : "tcp",
+         "FromPort" : "443",
+         "ToPort" : "443",
+         "SourceSecurityGroupId" : {"Fn::GetAtt" : ["prdelbaigweb", "GroupId"]}
+       },
+        {
+          "IpProtocol" : "tcp",
+          "FromPort" : "80",
+          "ToPort" : "80",
+          "CidrIp" : "210.239.44.160/32"
+        }
+       ]
+      	}
+
+    },
+    "prdelbaigweb" :{
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription" : "prd-elb-aig-web",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "prd-elb-aig-web" }],
+        "SecurityGroupIngress" : [ {
+         "IpProtocol" : "icmp",
+         "FromPort" : "-1",
+         "ToPort" : "-1",
+         "CidrIp" : "0.0.0.0/0"
+       }]
+      }
+
+    },
+
+
+
+	"RDSEC2Role" : {
+	    "Type"  : "AWS::IAM::Role",
+	    "Properties" : {
+	    	"ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"],
+	    	"RoleName": "prd-aig-web@ec2",
+	        "AssumeRolePolicyDocument" : {
+	            "Statement" : [ {
+	                "Effect" : "Allow",
+	                "Principal" : {
+	                    "Service" : [ "ec2.amazonaws.com","rds.amazonaws.com","monitoring.rds.amazonaws.com" ]
+	                },
+	                "Action" : [ "sts:AssumeRole" ]
+	            } ]
+	        }
+	    }
+	},
+
+	"S3RolePolicies" : {
+	    "Type" : "AWS::IAM::Policy",
+	    "Properties" : {
+	        "PolicyName" : "S3CodecommitAccess",
+	        "PolicyDocument" : {
+	            "Statement" : [ {
+	                "Effect" : "Allow",
+	                "Action" : ["s3:*","codecommit:*"],
+	                "Resource" : "*"
+	            }]
+	        },
+	        "Roles" : [ { "Ref" : "RDSEC2Role" } ]
+	    }
+	},
+
+	"S3InstanceProfile" : {
+	    "Type" : "AWS::IAM::InstanceProfile",
+	    "Properties" : {
+	        "Path" : "/",
+	        "Roles" : [ { "Ref" : "RDSEC2Role" } ]
+	    }
+	   }
+  },
+  "Outputs" : {
+    "RDS" : {
+      "Description" : "RDSId of the newly created RDS",
+      "Value" :  { "Ref" : "RDSinstance" }
+    },
+    "rdaigWebAID" : {
+      "Description": "The Instance ID A",  
+      "Value" : { "Ref" : "rdaigWebA" }
+    },
+    "rdaigWebBID" : {
+      "Description": "The Instance ID B",  
+      "Value" : { "Ref" : "rdaigWebB" }
+    },
+    "S3LoggingBucket" : {
+      "Description": "The S3LoggingBucket ID",  
+      "Value" : { "Ref" : "TestS3LoggingBucket" }
+    },
+    "S3prdimgaig" : {
+      "Description": "The S3prdimgaig ID",  
+      "Value" : { "Ref" : "S3prdimgaig" }
+    },
+    "prdrdsaigSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "prdrdsaig" }
+    },
+    "prdec2aigwebSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "prdec2aigweb" }
+    },
+    "prdelbaigwebwebSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "prdelbaigweb" }
+    },
+    "prddefelbSecurityGroupId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "prddefelb" }
+    }
+  }
+}

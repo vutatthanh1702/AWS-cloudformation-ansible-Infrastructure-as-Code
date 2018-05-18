@@ -1,0 +1,149 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "CodePipelineDemo",
+
+  "Parameters" : {
+    "KeyName": {
+      "Description" : "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription" : "must be the name of an existing EC2 KeyPair."
+    },
+    "InstanceType" : {
+      "Description" : "WebServer EC2 instance type",
+      "Type" : "String",
+      "Default" : "t2.micro",
+      "AllowedValues" : [ "t2.nano", "t2.micro", "t2.small", "t2.medium", "t2.large", "m1.small", "m1.medium", "m1.large", "m1.xlarge", "m2.xlarge", "m2.2xlarge", "m2.4xlarge", "m3.medium", "m3.large", "m3.xlarge", "m3.2xlarge", "m4.large", "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.10xlarge", "c1.medium", "c1.xlarge", "c3.large", "c3.xlarge", "c3.2xlarge", "c3.4xlarge", "c3.8xlarge", "c4.large", "c4.xlarge", "c4.2xlarge", "c4.4xlarge", "c4.8xlarge", "g2.2xlarge", "g2.8xlarge", "r3.large", "r3.xlarge", "r3.2xlarge", "r3.4xlarge", "r3.8xlarge", "i2.xlarge", "i2.2xlarge", "i2.4xlarge", "i2.8xlarge", "d2.xlarge", "d2.2xlarge", "d2.4xlarge", "d2.8xlarge", "hi1.4xlarge", "hs1.8xlarge", "cr1.8xlarge", "cc2.8xlarge", "cg1.4xlarge"],
+      "ConstraintDescription" : "must be a valid EC2 instance type."
+    },
+
+   "InstanceSecurityGroup" : {
+     "Description" : "EC2 instance SG",
+     "Type" : "AWS::EC2::SecurityGroup::Id",
+     "ConstraintDescription" : "set default Security Group"
+   },
+
+    "EnvType" : {
+      "Description" : "Environment type.",
+      "Default" : "Dev",
+      "Type" : "String",
+      "AllowedValues" : ["Prod", "Dev"],
+      "ConstraintDescription" : "must specify prod or test."
+    }
+
+  },
+  
+
+  "Resources" : {
+
+    "cowell" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : { "Ref" : "KeyName" },
+        "ImageId" : "ami-0b33d91d" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : {"Ref" : "InstanceType"},
+        "IamInstanceProfile" : {"Ref" : "Profile"},
+        "SecurityGroupIds" : [{"Ref" : "InstanceSecurityGroup"},{"Fn::GetAtt" : ["SG", "GroupId"]}],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "100" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+
+          {"Key" : "Name", "Value" : "thanh" },
+          {"Key" : "Category", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "BillingType", "Value" : "IT" },
+          {"Key" : "Security", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "ELB", "Value" : "none" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#!/bin/bash\n",
+          "yum -y update\n",
+          "yum install -y ruby\n",
+          "yum install -y aws-cli\n",
+          "cd /home/ec2-user\n",
+          "aws s3 cp s3://aws-codedeploy-us-east-1/latest/install . --region us-east-1\n",
+          "chmod +x ./install\n",
+          "./install auto\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n",
+          "mkdir /var/ansible\n",
+          "git clone --config credential.helper='!aws --region us-east-1 codecommit credential-helper $@' --config credential.UseHttpPath=true https://git-codecommit.us-east-1.amazonaws.com/v1/repos/DefaultPackage /var/ansible\n"
+          ]]} }
+      }
+    },
+
+    "SG" : {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription" : "SG",
+        "Tags" : [
+          {"Key" : "Name", "Value" : "thanh" },
+          {"Key" : "Category", "Value" : {"Ref" : "EnvType" } },
+          {"Key" : "BillingType", "Value" : "IT" },
+          {"Key" : "Security", "Value" : {"Ref" : "EnvType" } }
+        ],
+        "SecurityGroupIngress" : [ {
+          "IpProtocol" : "tcp",
+          "FromPort" : "80",
+          "ToPort" : "80",
+          "CidrIp" : "xxx.xxx.xxx.56/32"
+        }
+        ]
+      }
+    },
+
+    "Profile" : {
+         "Type" : "AWS::IAM::InstanceProfile",
+         "DependsOn" : "Role",
+         "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "Role" } ]
+         }
+       },
+
+  "Role" : {
+  "Type": "AWS::IAM::Role",
+  "Properties": {
+    "AssumeRolePolicyDocument": {
+        "Version" : "2012-10-17",
+        "Statement": [ {
+           "Effect": "Allow",
+           "Principal": {
+              "Service": [ "ec2.amazonaws.com" ]
+           },
+           "Action": [ "sts:AssumeRole" ]
+        } ]
+     },
+     "Path": "/",
+     "Policies": [{
+       "PolicyName" : "codecommit-policy",
+       "PolicyDocument" : {
+         "Version" : "2012-10-17",
+         "Statement" : [{
+           "Effect" : "Allow",
+           "Action" : [ "codecommit:*" ],
+           "Resource" : "*"
+         },
+         {
+          "Action": [
+            "s3:Get*",
+            "s3:List*"
+          ],
+          "Effect": "Allow",
+          "Resource": "*"
+        }]
+     }
+     }]
+   }
+  }
+
+
+
+  }
+}

@@ -1,0 +1,151 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "RDS",
+    
+    "Resources": {
+      "RDSinstance" : {
+      "Type" : "AWS::RDS::DBInstance",
+      "Properties" : {
+        "MultiAZ": "true",
+        "DBName" : "prdcorp",
+        "VPCSecurityGroups" :  [{ "Fn::ImportValue" : "PRD-SGprd-corp-RdsSG" }],
+        "AllocatedStorage" : "50",
+        "DBInstanceClass" : "db.m4.large",
+        "Engine" : "MySQL",
+        "EngineVersion" : "5.6.27",
+        "PubliclyAccessible" : "false",
+        "StorageEncrypted" : "true",
+        "BackupRetentionPeriod" : "7",
+        "Port" : "3306",
+        "StorageType":"standard",
+        "PreferredMaintenanceWindow" : "",
+        "OptionGroupName" : "default:mysql-5-6",
+        "CopyTagsToSnapshot" : "false",
+        "DBInstanceIdentifier" : "prd-corp-rds",
+        "MonitoringInterval" : "60",
+        "MonitoringRoleArn" : {"Fn::GetAtt" : ["RDSEC2Role", "Arn"] },
+        "LicenseModel" : "general-public-license",
+        "MasterUsername" : "aigprdcorp",
+        "MasterUserPassword" : "xxxxddff1",
+        "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
+        "DBParameterGroupName" : { "Ref" : "ParameterGroup" },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "prd-corp-rds" }]
+      }
+    },
+    "RDSinstanceCCLP" : {
+      "Type" : "AWS::RDS::DBInstance",
+      "Properties" : {
+        "MultiAZ": "true",
+        "DBName" : "prdsaint",
+        "VPCSecurityGroups" :  [{ "Fn::ImportValue" : "PRD-SGprd-corp-RdsSG" }],
+        "AllocatedStorage" : "50",
+        "DBInstanceClass" : "db.t2.large",
+        "Engine" : "MySQL",
+        "EngineVersion" : "5.6.27",
+        "PubliclyAccessible" : "false",
+        "StorageEncrypted" : "true",
+        "BackupRetentionPeriod" : "7",
+        "Port" : "3306",
+        "StorageType":"standard",
+        "PreferredMaintenanceWindow" : "",
+        "OptionGroupName" : "default:mysql-5-6",
+        "CopyTagsToSnapshot" : "false",
+        "DBInstanceIdentifier" : "prd-saint-rds",
+        "MonitoringInterval" : "60",
+        "MonitoringRoleArn" : {"Fn::GetAtt" : ["RDSEC2Role", "Arn"] },
+        "LicenseModel" : "general-public-license",
+        "MasterUsername" : "aigprdsaint",
+        "MasterUserPassword" : "ssssxxxx",
+        "DBSubnetGroupName" : { "Ref" : "DBSubnetGroup" },
+        "DBParameterGroupName" : { "Ref" : "ServiceParameterGroup" },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "prd-corp-rds" }]
+      }
+    },
+    "ParameterGroup" : {
+      "Type": "AWS::RDS::DBParameterGroup",
+      "Properties" : {
+        "Family" : "MySQL5.6",
+        "Description" : "MySQL5.6 Database Parameter Group",
+          "Parameters" : {
+            "autocommit" : "1" ,
+            "character_set_database" :"utf8",
+            "character_set_server" :"utf8"
+        }
+      }
+    },
+
+    "ServiceParameterGroup" : {
+      "Type": "AWS::RDS::DBParameterGroup",
+      "Properties" : {
+        "Family" : "MySQL5.6",
+        "Description" : "MySQL5.6 Database Parameter Group",
+          "Parameters" : {
+            "autocommit" : "1" ,
+            "character_set_database" :"utf8",
+            "character_set_server" :"utf8",
+            "innodb_large_prefix"  : "1",
+            "innodb_file_format"   : "Barracuda",
+            "innodb_ft_enable_stopword"  : "0",
+            "ft_min_word_len" : "1",
+            "innodb_ft_min_token_size" : "1"           
+        }
+      }
+    },
+    "DBSubnetGroup" : {
+         "Type" : "AWS::RDS::DBSubnetGroup",
+         "Properties" : {
+            "DBSubnetGroupDescription" : "description",
+            "SubnetIds" : [ { "Fn::ImportValue" :   "VPCprod-prd-prdSubnet1PubA"}, { "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC" } ],
+            "Tags" : [ {"Key" : "Name", "Value" : "prdaig"} ]
+         }
+      },
+    "RDSEC2Role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "ManagedPolicyArns": ["arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"],
+        "RoleName": "prd-aig-rds",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : [ "ec2.amazonaws.com","rds.amazonaws.com","monitoring.rds.amazonaws.com" ]
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+  },
+
+  "S3RolePolicies" : {
+      "Type" : "AWS::IAM::Policy",
+      "Properties" : {
+          "PolicyName" : "S3Access",
+          "PolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Action" : "s3:*",
+                  "Resource" : "*"
+              }]
+          },
+          "Roles" : [ { "Ref" : "RDSEC2Role" } ]
+      }
+  },
+
+  "S3InstanceProfile" : {
+      "Type" : "AWS::IAM::InstanceProfile",
+      "Properties" : {
+          "Path" : "/",
+          "Roles" : [ { "Ref" : "RDSEC2Role" } ]
+      }
+     }
+
+   },
+   "Outputs" : {
+    "RDS" : {
+      "Description" : "RDSId of the newly created RDS",
+      "Value" :  { "Ref" : "RDSinstance" }
+    }
+  }
+}

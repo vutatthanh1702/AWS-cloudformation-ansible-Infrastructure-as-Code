@@ -1,0 +1,53 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "STG-MNT",
+  "Parameters" : {
+
+  },
+  "Resources" : {
+    "S3LogJpaiggroup": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "log.jp.aiggroup",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3LogJpaiggroupPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3LogJpaiggroup"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpaiggroup" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    }
+  },
+  "Outputs" : {
+    "S3LogJpaiggroup" : {
+      "Description": "The Instance ID B",  
+      "Value" : { "Ref" : "S3LogJpaiggroup" }
+    }
+  }
+}

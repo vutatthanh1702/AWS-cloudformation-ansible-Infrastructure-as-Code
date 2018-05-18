@@ -1,0 +1,102 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "mntaig-SG",
+
+"Parameters" : {
+
+"MyVPCID" : {
+  "Description" : "Get the VPC name from created VPC stack ",
+  "Type" : "String",
+  "Default" : "VPC-mntaigVPC",
+  "ConstraintDescription" : "First character is stack name"
+}
+},
+
+  "Resources" : {
+
+    "mntaigDefLinux" : {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription" : "mntaig-def-linux",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+                "GroupDescription" : "DB SecurityGroup",
+        "SecurityGroupIngress" : [ 
+          {
+         "IpProtocol" : "icmp",
+         "FromPort" : "-1",
+         "ToPort" : "-1",
+         "CidrIp" : "0.0.0.0/0"
+              } ],
+        "Tags" : [
+          {"Key" : "Name", "Value" : "mntaig-def-linux" }
+        ]
+
+  }
+},
+
+  "mntaigBastion" : {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription" : "mntaig-bastion",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "mntaig-bastion" }
+        ],
+        "SecurityGroupIngress" : [ {
+          "IpProtocol": "tcp",
+          "FromPort": "0",
+          "ToPort": "65535",
+          "SourceSecurityGroupId" : {"Fn::GetAtt" : ["mntaigZabbix", "GroupId"]}
+      },
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "22",
+        "ToPort" : "22",
+        "CidrIp" : "sss.ss.171.88/32"
+      },
+     
+    ]
+
+  }
+},
+
+  "mntaigZabbix" : {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription" : "mntaig-zabbix",
+        "VpcId" :{ "Fn::ImportValue" : { "Ref" : "MyVPCID" } },
+        "Tags" : [
+          {"Key" : "Name", "Value" : "mntaig-zabbix" }
+        ],
+        "SecurityGroupIngress" : [ 
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "22",
+        "ToPort" : "22",
+        "CidrIp" : "sss.sss.8.210/32"
+      }
+
+    ]
+
+  }
+}
+
+},
+  "Outputs" : {
+    "mntaigDefLinuxId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "mntaigDefLinux" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-mntaigDefLinuxSG" }}
+    },
+    "mntaigBastionId" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "mntaigBastion" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-mntaigBastionSG" }}
+    },
+    "mntaigZabbixID" : {
+      "Description" : "Internal ssh security group",
+      "Value" : { "Ref" : "mntaigZabbix" },
+      "Export" : { "Name" : {"Fn::Sub": "${AWS::StackName}-mntaigZabbixSG" }}
+    }
+  }
+}

@@ -1,0 +1,1403 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "PROD",
+  "Parameters" : {
+
+
+    "MyVPCID" : {
+      "Description" : "Get the VPC name from created VPC stack ",
+      "Type" : "String",
+      "Default" : "VPCprod-prd-VPC",
+      "ConstraintDescription" : "First character is stack name"
+    }
+
+  },
+  "Resources" : {
+     "PrdEc2Web07a" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "m4.large",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web07Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web07SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web07a" },
+          {"Key" : "DeployTraget", "Value" : "prd-web07" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web07" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web07" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web07a" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web07a" }
+      }
+    },
+    "PrdEc2Web07c" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "m4.large",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web07Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web07SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web07c" },
+          {"Key" : "DeployTraget", "Value" : "prd-web07" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web07" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web07" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web07c" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web07c" }
+      }
+    },
+    "PrdEc2Web08" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.medium",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web08Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web08SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web08" },
+          {"Key" : "DeployTraget", "Value" : "prd-web08" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web08" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web08" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web08" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web08" }
+      }
+    },
+    "PrdEc2Web01a" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "m4.large",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web01Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web01SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web01a" },
+          {"Key" : "DeployTraget", "Value" : "prd-web01" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web01a" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web01" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web01a" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web01a" }
+      }
+    },
+    "PrdEc2Web01c" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "m4.large",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web01Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web01SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web01c" },
+          {"Key" : "DeployTraget", "Value" : "prd-web01" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web01c" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web01" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web01c" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web01c" }
+      }
+    },
+    "PrdEc2Web02" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.large",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web02Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web02SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web02" },
+          {"Key" : "DeployTraget", "Value" : "prd-web02" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web02" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web02" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web02" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web02" }
+      }
+    },
+
+    "PrdEc2Web03" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.large",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web03Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web03SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web03" },
+          {"Key" : "DeployTraget", "Value" : "prd-web03" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web03" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web03" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web03" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web03" }
+      }
+    },
+    "PrdEc2Web10" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "t2.medium",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web10Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web10SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web10" },
+          {"Key" : "DeployTraget", "Value" : "prd-web10" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web10" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web10" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web10" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web10" }
+      }
+    },
+
+
+
+    "PrdEc2Web04" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "m4.large",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web04Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web04SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web04" },
+          {"Key" : "DeployTraget", "Value" : "prd-web04" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web04" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web04" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web04" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web04" }
+      }
+    },
+    "PrdEc2Web09" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "prd-aig-web",
+        "EbsOptimized" : "false",
+        "SubnetId" :{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet1PubA" },
+        "ImageId" : "ami-923d12f5" ,
+        "DisableApiTermination" : "false",
+        "InstanceType" : "m4.large",
+        "IamInstanceProfile" : {"Ref" : "PrdEc2Web09Profile"},
+        "SecurityGroupIds" : [{ "Fn::ImportValue" : "PRD-SG-prod-DefLinuxSG2" },{ "Fn::ImportValue" : "PRD-SG-Ec2Web09SG" }],
+        "BlockDeviceMappings" : [
+          {
+            "DeviceName" : "/dev/xvda",
+            "Ebs" : { "VolumeSize" : "20","VolumeType" : "gp2" }
+          }
+        ],
+        "Monitoring" : "true",
+        "Tags" : [
+          {"Key" : "Backup-Generation", "Value" : "21" },
+          {"Key" : "Name", "Value" : "prd-ec2-web09" },
+          {"Key" : "DeployTraget", "Value" : "prd-web09" },
+          {"Key" : "Category", "Value" : "Prd" },
+          {"Key" : "BillingType", "Value" : "web09" },
+          {"Key" : "Inspector", "Value" : "PRD"},
+          {"Key" : "ELB", "Value" : "prd-alb-aig-web09" }
+
+        ],
+        "UserData" : { "Fn::Base64" : {"Fn::Join" : ["", [
+          "#! /bin/bash -v\n",
+          "yum update -y\n",
+          "yum install -y git\n",
+          "pip install ansible\n",
+          "cp /usr/share/zoneinfo/Asia/Tokyo /etc/localtime\n"
+                    ]]} }
+      }
+    },
+    "EIPAddressPrdEc2Web09" : {
+      "Type" : "AWS::EC2::EIP",
+      "Properties" : {
+        "Domain" : "vpc",
+        "InstanceId" : { "Ref" : "PrdEc2Web09" }
+      }
+    },
+
+
+    "S3LogJpaiggroup": {
+      "Type": "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : "prdalblog.jp.aiggroup"
+      }
+    },
+    "S3LogJpaiggroupBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3LogJpaiggroup"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpaiggroup" },
+                  "/",
+                  "web",
+                  "/AWSLogs/",
+                  { "Ref": "AWS::AccountId" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:PutObject"
+            ]
+
+          },
+          {
+            "Sid": "ELBAccessLogs",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3LogJpaiggroup" },
+                  "/",
+                  "admin",
+                  "/AWSLogs/",
+                  { "Ref": "AWS::AccountId" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:PutObject"
+            ]
+
+          } ]
+        }
+      }
+    },
+    "S3codeDeploy": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "prd-cd-aiggroup",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3codeDeployBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3codeDeploy"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "allow codedeploy",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3codeDeploy" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+    "S3img": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "prd-aig-wpimg",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3imgBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3img"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "img",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3img" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+    "S3thema": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "prd-aig-wpthema",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3themaBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3thema"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "img",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3thema" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+
+    "S3kaigoi": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "img.kaigo-i.com",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3themaBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3kaigoi"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "img",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3kaigoi" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+
+    "S3hoipla": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "img.hoipla.jp",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3themaBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3hoipla"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "img",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3hoipla" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+    "S3gcareer": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "img.g-career.jp",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3themaBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3gcareer"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "img",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3gcareer" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+    "S3callcenternavi": {
+      "Type": "AWS::S3::Bucket",
+       "Properties" : {
+          "BucketName" : "img.callcenternavi.jp",
+          "VersioningConfiguration": {
+            "Status": "Enabled"
+          }
+        }
+    },
+    "S3themaBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "S3callcenternavi"
+        },
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [ {
+            "Sid": "img",
+            "Effect": "Allow",
+            "Principal":"*",
+            "Resource": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:aws:s3:::",
+                  { "Ref": "S3callcenternavi" },
+                  "/*"
+                ]
+              ]
+            },
+            "Action": [
+              "s3:*"
+            ]
+          } ]
+        }
+      }
+    },
+
+    "ALBListeneraigWeb" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties" : {
+        "DefaultActions" : [{
+          "TargetGroupArn" : { "Ref" : "ALBTargetGroupWeb07" },
+          "Type" : "forward"
+        }],
+        "LoadBalancerArn" : { "Ref" : "ApplicationLoadBalanceraigWeb" },
+        "Port" : "80",
+        "Protocol" : "HTTP"
+      }
+    },
+    "ApplicationLoadBalanceraigWeb" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "DependsOn" : "ALBTargetGroupWeb07",
+      "Properties" : {
+        "Scheme" : "internet-facing",
+        "LoadBalancerAttributes" : [
+          { "Key" : "access_logs.s3.enabled", "Value" : "true" },
+          { "Key" : "access_logs.s3.bucket",
+            "Value" :
+            {
+              "Ref": "S3LogJpaiggroup"}
+            },
+          { "Key" : "access_logs.s3.prefix", "Value" : "web" },
+          { "Key" : "idle_timeout.timeout_seconds", "Value" : "60" },
+          { "Key": "deletion_protection.enabled", "Value": "false"}
+        ],
+        "Subnets" : [{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet1PubA" }, { "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC"  }],
+        "Name": "prd-alb-aig-web",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-alb-aig-web"}
+        ],
+        "SecurityGroups" : [{ "Fn::ImportValue" : "PRD-SG-DefAlb" }, { "Fn::ImportValue" : "PRD-SG-AclHttpSG"  }, { "Fn::ImportValue" : "PRD-SG-AclHttpsSG"  }]
+      }
+    },
+    "ALBTargetGroupWeb07" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "prd-aig-web07",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-aig-web07"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "PrdEc2Web07a" }, "Port" : "80" },
+          { "Id" : { "Ref" : "PrdEc2Web07c" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+    "ALBTargetGroupWeb08" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "prd-aig-web08",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-aig-web08"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "PrdEc2Web08" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+
+
+    "ALBListenerPrdAlbCorpWeb" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties" : {
+        "DefaultActions" : [{
+          "TargetGroupArn" : { "Ref" : "TargetGroupPrdCorpWeb07" },
+          "Type" : "forward"
+        }],
+        "LoadBalancerArn" : { "Ref" : "PrdAlbCorpWeb" },
+        "Port" : "80",
+        "Protocol" : "HTTP"
+      }
+    },
+    "PrdAlbCorpWeb" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "DependsOn" : "TargetGroupPrdCorpWeb07",
+      "Properties" : {
+        "Scheme" : "internet-facing",
+        "LoadBalancerAttributes" : [
+          { "Key" : "access_logs.s3.enabled", "Value" : "true" },
+          { "Key" : "access_logs.s3.bucket",
+            "Value" :
+            {
+              "Ref": "S3LogJpaiggroup"}
+            },
+          { "Key" : "access_logs.s3.prefix", "Value" : "web" },
+          { "Key" : "idle_timeout.timeout_seconds", "Value" : "60" },
+          { "Key": "deletion_protection.enabled", "Value": "false"}
+        ],
+        "Subnets" : [{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet1PubA" }, { "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC"  }],
+        "Name": "prd-alb-corp-web",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-alb-corp-web"}
+        ],
+        "SecurityGroups" : [{ "Fn::ImportValue" : "PRD-SG-DefAlb" }, { "Fn::ImportValue" : "PRD-SG-AclHttpSG"  }, { "Fn::ImportValue" : "PRD-SG-AclHttpsSG"  }]
+      }
+    },
+    "TargetGroupPrdCorpWeb07" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "prd-corp-web07",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-corp-web07"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "PrdEc2Web07a" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+    "TargetGroupPrdCorpWeb08" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "prd-corp-web08",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-corp-web08"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "PrdEc2Web08" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+    "TargetGroupPrdCorpWeb01" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "prd-corp-web01",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-corp-web01"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "PrdEc2Web01a" }, "Port" : "80" },
+          { "Id" : { "Ref" : "PrdEc2Web01c" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+
+
+
+    "ALBListenerAdminWeb" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties" : {
+        "DefaultActions" : [{
+          "TargetGroupArn" : { "Ref" : "ALBTargetGroupprdadminweb09" },
+          "Type" : "forward"
+        }],
+        "LoadBalancerArn" : { "Ref" : "ApplicationLoadBalancerAdminWeb" },
+        "Port" : "80",
+        "Protocol" : "HTTP"
+      }
+    },
+    "ApplicationLoadBalancerAdminWeb" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "DependsOn" : "ALBTargetGroupprdadminweb09",
+      "Properties" : {
+        "Scheme" : "internet-facing",
+        "LoadBalancerAttributes" : [
+          { "Key" : "access_logs.s3.enabled", "Value" : "true" },
+          { "Key" : "access_logs.s3.bucket",
+            "Value" :
+            {
+              "Ref": "S3LogJpaiggroup"}
+            },
+          { "Key" : "access_logs.s3.prefix", "Value" : "admin" },
+          { "Key" : "idle_timeout.timeout_seconds", "Value" : "60" },
+          { "Key": "deletion_protection.enabled", "Value": "false"}
+        ],
+        "Subnets" : [{ "Fn::ImportValue" : "VPCprod-prd-prdSubnet1PubA" }, { "Fn::ImportValue" : "VPCprod-prd-prdSubnet2PubC"  }],
+        "Name": "prd-alb-admin-web",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-alb-admin-web"}
+        ],
+        "SecurityGroups" : [{ "Fn::ImportValue" : "PRD-SG-DefAlb" }, { "Fn::ImportValue" : "PRD-SG-PrdAlbaigAdminSG" }]
+      }
+    },
+    "ALBTargetGroupprdadminweb09" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties" : {
+        "HealthCheckIntervalSeconds" : "30",
+        "HealthCheckPath" : "/hc-elb.html",
+        "HealthCheckPort" : "traffic-port",
+        "HealthCheckProtocol" : "HTTP",
+        "HealthCheckTimeoutSeconds" : "5",
+        "HealthyThresholdCount" : "10",
+        "Matcher" : { "HttpCode" : "200" },
+        "Name" : "prd-aig-web09",
+        "Port" : "80",
+        "Protocol" : "HTTP",
+        "Tags" : [
+          {"Key": "Name", "Value": "prd-admin-web09"}
+        ],
+        "TargetGroupAttributes" : [
+          { "Key" : "deregistration_delay.timeout_seconds", "Value" : "300" },
+          { "Key" : "stickiness.enabled", "Value" : "true" },
+          { "Key" : "stickiness.type", "Value" : "lb_cookie" },
+          { "Key" : "stickiness.lb_cookie.duration_seconds", "Value" : "86400" }
+        ],
+        "Targets" : [
+          { "Id" : { "Ref" : "PrdEc2Web09" }, "Port" : "80" }
+        ],
+        "UnhealthyThresholdCount" : "2",
+        "VpcId" : { "Fn::ImportValue" : { "Ref" : "MyVPCID" } }
+      }
+    },
+
+
+
+
+
+  	"PrdEc2Web07role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "prd-web07@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : "ec2.amazonaws.com"
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+	  },
+
+	  "PrdEc2Web07Policies" : {
+	      "Type" : "AWS::IAM::Policy",
+	      "Properties" : {
+	          "PolicyName" : "Ec2Web07",
+	          "PolicyDocument" : {
+	              "Statement" : [ {
+	                  "Effect" : "Allow",
+	                  "Action" : ["s3:*"],
+	                  "Resource" : ["arn:aws:s3:::log.jp.aiggroup/*","arn:aws:s3:::prd-aig-wpimg/*","arn:aws:s3:::prd-aig-wpthema/*"]
+	              }]
+	          },
+	          "Roles" : [ { "Ref" : "PrdEc2Web07role" } ]
+	      }
+	  },
+
+	  "PrdEc2Web07Profile" : {
+	      "Type" : "AWS::IAM::InstanceProfile",
+	      "Properties" : {
+	          "Path" : "/",
+	          "Roles" : [ { "Ref" : "PrdEc2Web07role" } ]
+	      }
+	   },
+
+    "PrdEc2Web08role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "prd-web08@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : "ec2.amazonaws.com"
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "PrdEc2Web08Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "Ec2Web08",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : ["arn:aws:s3:::log.jp.aiggroup/*","arn:aws:s3:::prd-aig-wpimg/*","arn:aws:s3:::prd-aig-wpthema/*"]
+                }]
+            },
+            "Roles" : [ { "Ref" : "PrdEc2Web08role" } ]
+        }
+    },
+
+    "PrdEc2Web08Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "PrdEc2Web08role" } ]
+        }
+     },
+     "PrdEc2Web01role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "prd-web01@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : "ec2.amazonaws.com"
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "PrdEc2Web01Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "Ec2Web01",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : ["arn:aws:s3:::log.jp.aiggroup/*","arn:aws:s3:::prd-aig-wpimg/*","arn:aws:s3:::prd-aig-wpthema/*"]
+                }]
+            },
+            "Roles" : [ { "Ref" : "PrdEc2Web07role" } ]
+        }
+    },
+
+    "PrdEc2Web01Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "PrdEc2Web01role" } ]
+        }
+     },
+
+
+     "PrdEc2Web02role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "prd-web02@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : "ec2.amazonaws.com"
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "PrdEc2Web02Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "Ec2Web02",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : ["arn:aws:s3:::log.jp.aiggroup/*"]
+                }]
+            },
+            "Roles" : [ { "Ref" : "PrdEc2Web02role" } ]
+        }
+    },
+
+    "PrdEc2Web02Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "PrdEc2Web02role" } ]
+        }
+     },
+
+     "PrdEc2Web03role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "prd-web03@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : "ec2.amazonaws.com"
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "PrdEc2Web03Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "Ec2Web03",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : ["arn:aws:s3:::log.jp.aiggroup/*"]
+                }]
+            },
+            "Roles" : [ { "Ref" : "PrdEc2Web03role" } ]
+        }
+    },
+
+    "PrdEc2Web03Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "PrdEc2Web03role" } ]
+        }
+     },
+    
+    "PrdEc2Web10role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "prd-web10@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : "ec2.amazonaws.com"
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "PrdEc2Web10Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "Ec2Web10",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : ["arn:aws:s3:::log.jp.aiggroup/*"]
+                }]
+            },
+            "Roles" : [ { "Ref" : "PrdEc2Web10role" } ]
+        }
+    },
+
+    "PrdEc2Web10Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "PrdEc2Web10role" } ]
+        }
+     },
+
+
+     "PrdEc2Web04role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "prd-web04@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : "ec2.amazonaws.com"
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "PrdEc2Web04Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "Ec2Web01",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : ["arn:aws:s3:::log.jp.aiggroup/*","arn:aws:s3:::prd-aig-wpimg/*","arn:aws:s3:::prd-aig-wpthema/*"]
+                }]
+            },
+            "Roles" : [ { "Ref" : "PrdEc2Web04role" } ]
+        }
+    },
+
+    "PrdEc2Web04Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "PrdEc2Web04role" } ]
+        }
+     },
+
+
+    "PrdEc2Web09role" : {
+      "Type"  : "AWS::IAM::Role",
+      "Properties" : {
+        "RoleName": "prd-web09@ec2",
+          "AssumeRolePolicyDocument" : {
+              "Statement" : [ {
+                  "Effect" : "Allow",
+                  "Principal" : {
+                      "Service" : "ec2.amazonaws.com"
+                  },
+                  "Action" : [ "sts:AssumeRole" ]
+              } ]
+          }
+      }
+    },
+
+    "PrdEc2Web09Policies" : {
+        "Type" : "AWS::IAM::Policy",
+        "Properties" : {
+            "PolicyName" : "Ec2Web09",
+            "PolicyDocument" : {
+                "Statement" : [ {
+                    "Effect" : "Allow",
+                    "Action" : ["s3:*"],
+                    "Resource" : ["arn:aws:s3:::log.jp.aiggroup/*","arn:aws:s3:::prd-aig-wpimg/*","arn:aws:s3:::prd-aig-wpthema/*"]
+                }]
+            },
+            "Roles" : [ { "Ref" : "PrdEc2Web09role" } ]
+        }
+    },
+
+    "PrdEc2Web09Profile" : {
+        "Type" : "AWS::IAM::InstanceProfile",
+        "Properties" : {
+            "Path" : "/",
+            "Roles" : [ { "Ref" : "PrdEc2Web09role" } ]
+        }
+     }
+
+  }
+}

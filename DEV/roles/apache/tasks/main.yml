@@ -1,0 +1,23 @@
+---
+- name: Install apache24
+  yum: name=httpd24 state=present
+
+- name: SecuritySetting
+  file: path=/etc/httpd/conf.d/welcome.conf state=absent
+
+- name: Install mod_ssl
+  yum: name=mod24_ssl
+
+- name: change ssl.conf
+  lineinfile: dest=/etc/httpd/conf.d/ssl.conf backup=yes regexp= "{{item.regexp}}" line= "{{item.line}}"
+
+  with_items:
+    - { regexp: 'SSLCipherSuite', line: 'ALL:!aNULL:!eNULL:!EXP:!RC2:!DES:!IDEA:!SEED:!MD5' }
+    - { regexp: 'SSLProtocol', line: 'SSLProtocol all -SSLv2 -SSLv3' }
+
+- name: Copy Default Config
+  template: src=default_httpd2.4.conf  dest=/etc/httpd/conf/httpd.conf
+
+- name: SecuritySetting
+  template: src=security.conf  dest=/etc/httpd/conf.d/security.conf
+  notify: restart httpd

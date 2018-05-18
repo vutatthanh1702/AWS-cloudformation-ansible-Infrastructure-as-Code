@@ -1,0 +1,22 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Metadata": {
+  },
+  "Resources": {
+    "myuser" : {
+     "Type" : "AWS::IAM::User",
+     "Properties" : {
+        "UserName": "ducnt",
+        "LoginProfile" : {
+           "Password" : "xxxxx"
+        },
+        "Policies" : [ {
+           "PolicyName" : "giveaccesstoqueueonly",
+           "PolicyDocument" : {
+              "Version": "2012-10-17",
+              "Statement" : [ { "Effect": "Allow", "Action": "*", "Resource": "*" }] }
+        }]
+     }
+    }
+  } 
+}
